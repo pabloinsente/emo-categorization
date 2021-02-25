@@ -1,0 +1,14 @@
+COCO_train2014_000000122250.jpg
+COCO_train2014_000000029582.jpg
+sun_aijojbabpoxzlosy.jpg
+ffty7s5jy6wiuzn4v3.jpg
+COCO_train2014_000000022987.jpg
+COCO_train2014_000000413562.jpg
+COCO_train2014_000000066096.jpg
+labelme_rqdlhdoibcktvks.jpg
+COCO_train2014_000000425038.jpg
+frame_k6o65brc7bqhhht0.jpg
+h77lhuu2zlffytw3p5.jpg
+COCO_train2014_000000509047.jpg
+COCO_train2014_000000319735.jpg
+frame_2uz94f2eqg6k3s0w.jpg

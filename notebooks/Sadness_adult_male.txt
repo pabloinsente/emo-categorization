@@ -1,0 +1,5 @@
+COCO_train2014_000000360271.jpg
+COCO_val2014_000000062068.jpg
+frame_66ob1dorv8d4sqdm.jpg
+COCO_val2014_000000126583.jpg
+frame_gxlkof6rdo4xasmz.jpg
