@@ -16,7 +16,7 @@ library(ggResidpanel)
 library(sjPlot)
 library(webshot)
 library(equatiomatic)
-library(textpreview)
+library(svglite)
 
 df = read_csv("../clean_data/free_labeling_emotion_uw_students_long_format_lmer.csv")
 
@@ -149,7 +149,6 @@ cat(aov.apa, file = "../../emotions_dashboard/data/anova_lmer_summary_forced_uw_
 ### UPDATE ###
 
 
-
 # sex-photo effect:
 # The effect of sex-photo on sentiment-score was not significant, b = -0.01602, F(1,51) = 3.7, p = 0.054
 # Averaging across POC and Caucasian photo-faces, and controlling for ethnicity and the ethnicity-photo by sex-photo interaction,
@@ -175,6 +174,7 @@ cat(aov.apa, file = "../../emotions_dashboard/data/anova_lmer_summary_forced_uw_
 
 
 ### Individual participant data for sex * ethnicity conditions
+s <- svgstring()
 
 p = ggplot(df,aes(sex,sentimentScore,color=ethnicity,group=ethnicity))+
     geom_point()+
@@ -184,11 +184,14 @@ p = ggplot(df,aes(sex,sentimentScore,color=ethnicity,group=ethnicity))+
     scale_color_manual(values=c("#1f77b4", "#ff7f0e"))
 
 p
+svg.string.plot <- s()
 
-ggsave("lmer_output/participants_charts_lmer_forced_uw_students.png", width = 800, height = 800, units = "px", scale=5, dpi=400)
-ggsave("../../emotions_dashboard/data/participants_charts_lmer_forced_uw_students.png", width = 800, height = 800, units = "px", scale=5, dpi=400)
+cat(svg.string.plot, file = "lmer_output/participants_charts_lmer_forced_uw_students.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/participants_charts_lmer_forced_uw_students.txt")
 
+dev.off()
 
+# https://ademos.people.uic.edu/Chapter18.html
 # ANOVA of the between subjects residuals.
 # the assumption is that the variance is not going to differ, we would hope to see 
 # NO STATISTICAL DIFFERENCES in the following procedure (i.e. p>0.05)
@@ -198,64 +201,99 @@ df$Abs.Model.F.Res <-abs(df$Model.F.Res) #creates a new column with the absolute
 df$Model.F.Res2 <- df$Abs.Model.F.Res^2 #squares the absolute values of the residuals to provide the more robust estimate
 Levene.Model.F <- lm(Model.F.Res2 ~ participantId, data=df) #ANOVA of the squared residuals
 anova(Levene.Model.F) #displays the results
-
 format(4.440288e-07, scientific = F)
+
+# save to html table
+aov.btw.res <- kable(anova(Levene.Model.F), digits = 3, format = "html", caption = "ANOVA table for between subjects residuals")
+
+cat(aov.btw.res, file = "lmer_output/anova_bwt_res_summary_forced_uw_students.html")
+cat(aov.btw.res, file = "../../emotions_dashboard/data/anova_bwt_res_summary_forced_uw_students.html")
+
 
 # Since the p value < 0.05, we can say that the variance of the residuals is equal and 
 # therefore the assumption of **homoscedasticity** NOT is met 
 
+s <- svgstring(width = 7,
+               height = 5)
+
 Plot.Model.F <- plot(m2) #creates a fitted vs residual plot
 Plot.Model.F
+Plot.Model.F <- s()
+cat(Plot.Model.F , file = "lmer_output/fitted_vs_residual_plot_forced_uw_students.txt")
+cat(Plot.Model.F , file = "../../emotions_dashboard/data/fitted_vs_residual_plot_forced_uw_students.txt")
+dev.off()
 
 ## This looks very unsystematic
 
 resid1 <- hlm_resid(m2, level = 1, standardize = TRUE)
 
+s <- svgstring(width = 7,
+               height = 5)
+
 ggplot(data = resid1, aes(x = participantId, y = .std.ls.resid)) + 
   geom_point(alpha = 0.2) +
   geom_smooth(method = "loess", se = FALSE) + 
-  labs(y = "LS level-1 residuals", 
-       title = "LS residuals by participant ID")
+  labs(y = "Least-Squares level-1 residuals", 
+       title = "Least-Squares residuals by participant ID")
+
+l1.res <- s()
+cat(l1.res , file = "lmer_output/l1_res_plot_forced_uw_students.txt")
+cat(l1.res , file = "../../emotions_dashboard/data/l1_res_plot_forced_uw_students.txt")
+dev.off()
 
 ## There are quite a couple of large residuals 
 
 resid2 = hlm_resid(m2, level = "participantId", standardize = TRUE, include.ls = FALSE)
 
+s <- svgstring(width = 7,
+               height = 5)
+
 ggplot(data = resid2, aes(x = participantId, y = .std.ranef.intercept)) + 
   geom_point(alpha = 0.4) +
   geom_smooth(method = "loess", se = FALSE) + 
-  labs(y = "Level-2 residuals", 
-       title = "L2 residuals by participant ID")
+  labs(y = "Random effects - intercept", 
+       title = "Intercept random effects against participant ID")
+
+l2.res.int <- s()
+cat(l2.res.int , file = "lmer_output/l2_int_res_plot_forced_uw_students.txt")
+cat(l2.res.int , file = "../../emotions_dashboard/data/l2_int_res_plot_forced_uw_students.txt")
+dev.off()
 
 # 43, 9, 16
-
-ggplot(data = resid2, aes(x = participantId, y = .std.ranef.sex_c)) + 
-  geom_point(alpha = 0.4) +
-  geom_smooth(method = "loess", se = FALSE) + 
-  labs(y = "Level-2 residuals", 
-       title = "L2 residuals by participant ID")
+# 
+# ggplot(data = resid2, aes(x = participantId, y = .std.ranef.sex_c)) + 
+#   geom_point(alpha = 0.4) +
+#   geom_smooth(method = "loess", se = FALSE) + 
+#   labs(y = "Level-2 residuals", 
+#        title = "L2 residuals by participant ID")
 
 # 9, 16
-
-    ggplot(data = resid2, aes(x = participantId, y = .std.ranef.ethnicity_c)) + 
-  geom_point(alpha = 0.4) +
-  geom_smooth(method = "loess", se = FALSE) + 
-  labs(y = "Level-2 residuals", 
-       title = "L2 residuals by participant ID")
+# 
+#     ggplot(data = resid2, aes(x = participantId, y = .std.ranef.ethnicity_c)) + 
+#   geom_point(alpha = 0.4) +
+#   geom_smooth(method = "loess", se = FALSE) + 
+#   labs(y = "Level-2 residuals", 
+#        title = "L2 residuals by participant ID")
 
 # 43
-
-ggplot(data = resid2, aes(x = participantId, y = .std.ranef.sex_c_ethnicity_c)) + 
-  geom_point(alpha = 0.4) +
-  geom_smooth(method = "loess", se = FALSE) + 
-  labs(y = "Level-2 residuals", 
-       title = "L2 residuals by participant ID")
+# 
+# ggplot(data = resid2, aes(x = participantId, y = .std.ranef.sex_c_ethnicity_c)) + 
+#   geom_point(alpha = 0.4) +
+#   geom_smooth(method = "loess", se = FALSE) + 
+#   labs(y = "Level-2 residuals", 
+#        title = "L2 residuals by participant ID")
 
 # 43, 9
 
 require("lattice")
-
+s <- svgstring(width = 7,
+               height = 5)
 qqmath(m2, id=0.05) #id: identifies values that may be exerting undue influence on the model (i.e. outliers)
+svg.qqplot <- s()
+cat(svg.qqplot, file = "lmer_output/qqplot_lmer_forced_uw_students.txt")
+cat(svg.qqplot, file = "../../emotions_dashboard/data/qqplot_lmer_forced_uw_students.txt")
+dev.off()
+
 
 # looks not normal...
 # https://ademos.people.uic.edu/Chapter18.html
