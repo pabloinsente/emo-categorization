@@ -1,7 +1,8 @@
-install.packages(c("lme4", "car", "lmerTest", "lmerTest", 
-                   "tidyverse", "ragg", "HLMdiag", "VCA", 
-                   "hrbrthemes", "ggResidpanel", "sjPlot",
-                   "kableExtra", "knitr"))
+#install.packages(c("lme4", "car", "lmerTest", "lmerTest", 
+#                   "tidyverse", "ragg", "HLMdiag", "VCA", 
+#                   "hrbrthemes", "ggResidpanel", "sjPlot",
+#                   "kableExtra", "knitr", "remotes", 
+#                   "equatiomatic", 'textpreview'))
 
 library(lme4)
 library(car)
@@ -14,6 +15,8 @@ library(hrbrthemes)
 library(ggResidpanel)
 library(sjPlot)
 library(webshot)
+library(equatiomatic)
+library(textpreview)
 
 df = read_csv("../clean_data/free_labeling_emotion_uw_students_long_format_lmer.csv")
 
@@ -108,7 +111,16 @@ m2<-lmer(
     control=control)
 summary(m2)
 
+### get mathematical formula
+formula_lmer <- extract_eq(m2)
 
+cat(formula_lmer, file = "lmer_output/formula_lmer_summary_forced_uw_students.txt")
+cat(formula_lmer, file = "../../emotions_dashboard/data/formula_lmer_summary_forced_uw_students.txt")
+
+#extract_eq(m2, use_coefs = TRUE)
+
+
+### get coefficient table for reporting
 tab_model(m2, file = "lmer_output/lmer_summary_forced_uw_students.html")
 tab_model(m2, file = "../../emotions_dashboard/data/lmer_summary_forced_uw_students.html")
 
@@ -124,15 +136,15 @@ library(knitr)
 (aov <- anova(m2))
 
 aov.apa <- kable(aov, digits = 3, format = "html", caption = "ANOVA table for LMER coefficients")
-cat(aov.apa, file = "lmer_output/anova_lmer_summary_forced_uw_students.html.html")
+cat(aov.apa, file = "lmer_output/anova_lmer_summary_forced_uw_students.html")
 cat(aov.apa, file = "../../emotions_dashboard/data/anova_lmer_summary_forced_uw_students.html")
 
 
-format(1.007044e-04, scientific = F)
+#format(1.007044e-04, scientific = F)
 
-format(1.025469e-01, scientific = F)
+#format(1.025469e-01, scientific = F)
 
-format(1.418980e-07, scientific = F)
+#format(1.418980e-07, scientific = F)
 
 ### UPDATE ###
 
@@ -161,23 +173,21 @@ format(1.418980e-07, scientific = F)
 # Controlling for lower-order effects, the difference in sentiment-scorees between the two sex-photo conditions 
 # was 0.04 points greater in the caucasian-photos than in the poc-photos
 
+
+### Individual participant data for sex * ethnicity conditions
+
 p = ggplot(df,aes(sex,sentimentScore,color=ethnicity,group=ethnicity))+
     geom_point()+
     geom_smooth(method="lm",se=F)+
     facet_wrap(~participantId)+
-    theme_bw()
+    theme_bw()+
+    scale_color_manual(values=c("#1f77b4", "#ff7f0e"))
 
-# pngfile <- fs::path(knitr::fig_path(),  "resolution.png")
-# agg_png(pngfile, width = 7087, height = 4252, units = "px", res = 900)
-# plot(p)
-# invisible(dev.off())
-# knitr::include_graphics(pngfile)
+p
 
-pngfile <- fs::path(knitr::fig_path(),  "scaling.png")
-agg_png(pngfile, width = 60, height = 60, units = "cm", res = 300, scaling = 2.5)
-plot(p)
-invisible(dev.off())
-knitr::include_graphics(pngfile)
+ggsave("lmer_output/participants_charts_lmer_forced_uw_students.png", width = 800, height = 800, units = "px", scale=5, dpi=400)
+ggsave("../../emotions_dashboard/data/participants_charts_lmer_forced_uw_students.png", width = 800, height = 800, units = "px", scale=5, dpi=400)
+
 
 # ANOVA of the between subjects residuals.
 # the assumption is that the variance is not going to differ, we would hope to see 
