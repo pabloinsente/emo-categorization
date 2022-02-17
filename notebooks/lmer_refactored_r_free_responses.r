@@ -2,7 +2,8 @@
 #                   "tidyverse", "ragg", "HLMdiag", "VCA", 
 #                   "hrbrthemes", "ggResidpanel", "sjPlot",
 #                   "kableExtra", "knitr", "remotes", 
-#                   "equatiomatic", 'textpreview'))
+#                   "equatiomatic", 'textpreview', "heavy",
+#                   "robustlmm"))
 
 library(lme4)
 library(car)
@@ -17,8 +18,20 @@ library(sjPlot)
 library(webshot)
 library(equatiomatic)
 library(svglite)
+library(knitr)
+library(robustlmm)
 
 df = read_csv("../clean_data/free_labeling_emotion_uw_students_long_format_lmer.csv")
+
+
+########################
+########################
+
+# descriptives
+
+########################
+########################
+
 
 head(df)
 
@@ -67,6 +80,16 @@ df %>%
     geom_histogram(color="#5e6162", fill="#66a3a3") +
     theme_ipsum()
 
+
+
+#####################################
+#####################################
+
+# Fit LMER 
+
+#####################################
+#####################################
+
 # # with derivatives check
 # control.check=lmerControl(optimizer ="Nelder_Mead", calc.derivs=FALSE, optCtrl=list(maxfun=2e6), check.nobs.vs.nRE = "ignore")
 
@@ -85,7 +108,10 @@ df %>%
 #     control=control)
 # summary(m1)
 
+
+##
 # MAXIMAL MODEL doesn't converge at all / tried multiple optimizers 
+##
 
 #  with derivatives check
 # control.check=lmerControl(optimizer ="Nelder_Mead", optCtrl=list(maxfun=2e6), check.nobs.vs.nRE = "ignore")
@@ -98,18 +124,56 @@ df %>%
 #     control=control.check)
 # summary(m2)
 
-## doesn't converge
+## doesn't converge either
 
 ## without derivatives check
-control=lmerControl(optimizer ="Nelder_Mead", calc.derivs=FALSE, optCtrl=list(maxfun=2e6), check.nobs.vs.nRE = "ignore")
-
-
-control=lmerControl(optimizer ="Nelder_Mead", calc.derivs=FALSE,optCtrl=list(maxfun=2e6),check.nobs.vs.nRE = "ignore")
+control=lmerControl(optimizer ="Nelder_Mead", calc.derivs=FALSE,optCtrl=list(maxfun=2e6), check.nobs.vs.nRE = "ignore")
 m2<-lmer(
     sentimentScore ~ 1 + sexC*ethnicityC + (1 + sexC*ethnicityC|participantId), 
     data = df,
     control=control)
+
 summary(m2)
+
+### model comparison ####
+
+m2.sex <-lmer(
+  sentimentScore ~ 1 + sexC +  (1+ sexC*ethnicityC|participantId), 
+  data = df,
+  control=control)
+
+summary(m2.sex)
+anova(m2, m2.sex)
+
+m2.ethnicityC <-lmer(
+  sentimentScore ~ 1 + ethnicityC + (1+ sexC*ethnicityC |participantId), 
+  data = df,
+  control=control)
+
+summary(m2.ethnicityC)
+anova(m2, m2.ethnicityC)
+
+m2.add <-lmer(
+  sentimentScore ~ 1 + sexC+ethnicityC + (1+sexC*ethnicityC |participantId), 
+  data = df,
+  control=control)
+
+summary(m2.add)
+anova(m2, m2.add)
+
+full.interactive.model <- m2
+sex.only.model <- m2.sex
+ethnicity.only.model <- m2.ethnicityC
+sex.ethnicity.additive.model <- m2.add
+
+anova(sex.only.model, ethnicity.only.model, sex.ethnicity.additive.model, full.interactive.model)
+
+(aov.comparison <- anova(sex.only.model, ethnicity.only.model, sex.ethnicity.additive.model, full.interactive.model))
+
+aov.apa.com <- kable(aov.comparison, digits = 3, format = "html", caption = "ANOVA table for model comparison")
+cat(aov.apa.com, file = "lmer_output/anova_comparison_lmer_summary_forced_uw_students.html")
+cat(aov.apa.com, file = "../../emotions_dashboard/data/anova_comparison_lmer_summary_forced_uw_students.html")
+
 
 ### get mathematical formula
 formula_lmer <- extract_eq(m2)
@@ -124,14 +188,8 @@ cat(formula_lmer, file = "../../emotions_dashboard/data/formula_lmer_summary_for
 tab_model(m2, file = "lmer_output/lmer_summary_forced_uw_students.html")
 tab_model(m2, file = "../../emotions_dashboard/data/lmer_summary_forced_uw_students.html")
 
-# Anova(m2,type=3,t="F")  
-# ------------------- 
-# it won't coverge
 
-## Type III anova table with p-values for F-tests based on Satterthwaite's
-## method:
-
-library(knitr)
+## Type III anova table with p-values for F-tests based on Satterthwaite's method
 
 (aov <- anova(m2))
 
@@ -140,21 +198,19 @@ cat(aov.apa, file = "lmer_output/anova_lmer_summary_forced_uw_students.html")
 cat(aov.apa, file = "../../emotions_dashboard/data/anova_lmer_summary_forced_uw_students.html")
 
 
-#format(1.007044e-04, scientific = F)
+#####################################
+#####################################
 
-#format(1.025469e-01, scientific = F)
+# PENDING: UPDATE MODEL INTERPRETATION 
 
-#format(1.418980e-07, scientific = F)
-
-### UPDATE ###
+#####################################
+#####################################
 
 
 # sex-photo effect:
 # The effect of sex-photo on sentiment-score was not significant, b = -0.01602, F(1,51) = 3.7, p = 0.054
 # Averaging across POC and Caucasian photo-faces, and controlling for ethnicity and the ethnicity-photo by sex-photo interaction,
 # sentiment-scores were -0.016 more negative in response to male faces than female faces. 
-
-### UPDATE ###
 
 
 # ethnicity-photo effect:
@@ -163,9 +219,6 @@ cat(aov.apa, file = "../../emotions_dashboard/data/anova_lmer_summary_forced_uw_
 # Averaging across female and male photos, and controlling for sex-photo and the sex-photo by ethnicity-photo interaction,
 # sentiment-scores were 0.028 more positive in response to caucasian-photos than poc-photos
 
-### UPDATE ###
-
-
 # Face by odor interaction:
 # The face by odor interaction was significant, b = 0.04, F(1,51) = 6.03, p = 0.014.
 # For sake of completeness:
@@ -173,7 +226,14 @@ cat(aov.apa, file = "../../emotions_dashboard/data/anova_lmer_summary_forced_uw_
 # was 0.04 points greater in the caucasian-photos than in the poc-photos
 
 
-### Individual participant data for sex * ethnicity conditions
+#####################################
+#####################################
+
+# Individual participant data for sex * ethnicity conditions
+
+#####################################
+#####################################
+
 s <- svgstring()
 
 p = ggplot(df,aes(sex,sentimentScore,color=ethnicity,group=ethnicity))+
@@ -190,6 +250,15 @@ cat(svg.string.plot, file = "lmer_output/participants_charts_lmer_forced_uw_stud
 cat(svg.string.plot, file = "../../emotions_dashboard/data/participants_charts_lmer_forced_uw_students.txt")
 
 dev.off()
+
+
+#####################################
+#####################################
+
+# Check homogeneity of variance
+
+#####################################
+#####################################
 
 # https://ademos.people.uic.edu/Chapter18.html
 # ANOVA of the between subjects residuals.
@@ -285,6 +354,15 @@ dev.off()
 
 # 43, 9
 
+
+#####################################
+#####################################
+
+# Check normality of error term
+
+#####################################
+#####################################
+
 require("lattice")
 s <- svgstring(width = 7,
                height = 5)
@@ -298,7 +376,16 @@ dev.off()
 # looks not normal...
 # https://ademos.people.uic.edu/Chapter18.html
 
-resid_panel(m2)
+# resid_panel(m2)
+
+
+#####################################
+#####################################
+
+# Check influence
+
+#####################################
+#####################################
 
 infl <- hlm_influence(m2, level = 1)
 
@@ -306,17 +393,23 @@ infl <- hlm_influence(m2, level = 1)
 CutOff = 4/nrow(infl)
 print(CutOff)
 
+s <- svgstring(width = 7,
+               height = 5)
 # dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = "internal")
 dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = CutOff)
+svg.string.plot <- s()
+cat(svg.string.plot, file = "lmer_output/influence_datapoints_lmer_forced_uw_students.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_datapoints_lmer_forced_uw_students.txt")
+dev.off()
 
-# filter(infl, cookd > IQR)
 
 high_cooksd = infl[infl$cooksd > CutOff, ] %>%
   arrange(desc(cooksd))
 
 head(high_cooksd, n=10)
 
-# high influence data points
+#### high influence data points
+
 high_cooksd$id
 
 infl.classes <- hlm_influence(m2, level = "participantId")
@@ -324,8 +417,17 @@ infl.classes <- hlm_influence(m2, level = "participantId")
 CutOffGroup = 4/49
 CutOffGroup
 
+s <- svgstring(width = 7,
+               height = 5)
+
 # dotplot_diag(infl.classes$cooksd, name = "cooks.distance", cutoff = "internal", modify = "dotplot")
 dotplot_diag(infl.classes$cooksd, name = "cooks.distance", cutoff = CutOffGroup, modify = "dotplot")
+svg.string.plot <- s()
+
+cat(svg.string.plot, file = "lmer_output/influence_participants_lmer_forced_uw_students.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_participants_lmer_forced_uw_students.txt")
+dev.off()
+
 
 high_cooksd_participants = infl.classes[infl.classes$cooksd > CutOffGroup, ] %>%
   arrange(desc(cooksd))
@@ -334,11 +436,27 @@ high_cooksd_participants
 
 # participant 43
 
+#####################################
+#####################################
+
+# Check leverage
+
+#####################################
+#####################################
+
 CutOffLeverage = mean(infl$leverage.overall)*3
 CutOffLeverage
 
+s <- svgstring(width = 7,
+               height = 5)
+
 # dotplot_diag(infl$leverage.overall, name = "leverage", cutoff = "internal")
 dotplot_diag(infl$leverage.overall, name = "leverage", cutoff = CutOffLeverage)
+
+svg.string.plot <- s()
+cat(svg.string.plot, file = "lmer_output/leverage_datapoints_lmer_forced_uw_students.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/leverage_datapoints_lmer_forced_uw_students.txt")
+dev.off()
 
 high_leverage = infl[infl$leverage.overall > CutOffLeverage, ] %>%
   arrange(desc(leverage.overall))
@@ -352,8 +470,18 @@ high_leverage$id
 CutOffLeverageParticipants = mean(infl.classes$leverage.overall)*3
 CutOffLeverageParticipants
 
+
+s <- svgstring(width = 7,
+               height = 5)
+
 # dotplot_diag(infl.classes$leverage.overall, name = "leverage", cutoff = "internal")
 dotplot_diag(infl.classes$leverage.overall, name = "leverage", cutoff = CutOffLeverageParticipants)
+
+svg.string.plot <- s()
+cat(svg.string.plot, file = "lmer_output/leverage_participants_lmer_forced_uw_students.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/leverage_participants_lmer_forced_uw_students.txt")
+dev.off()
+
 
 high_leverage_participants = infl.classes[infl.classes$leverage.overall > CutOffLeverageParticipants, ] %>%
   arrange(desc(leverage.overall))
@@ -362,17 +490,6 @@ high_leverage_participants = infl.classes[infl.classes$leverage.overall > CutOff
 high_leverage_participants
 
 ## No high leverage participants
-
-# infl2 <- hlm_influence(m2, level = 1, leverage = c("overall", "fixef", "ranef", "ranef.uc"))
-
-# dotplot_diag(infl2$leverage.fixef, name = "leverage", cutoff = "internal", modify = "dotplot")
-
-# aug <- hlm_augment(m2, level = 1)
-
-# aug2 <- aug %>%
-#   arrange(desc(cooksd))
-
-# head(aug2)
 
 #add index column to data frame
 df$id <- 1:nrow(df)
@@ -392,101 +509,152 @@ df.filtered <- filter(df.filtered, participantId != 43)
 
 nrow(df.filtered)
 
-## without derivatives check
-control=lmerControl(optimizer ="Nelder_Mead", calc.derivs=FALSE, optCtrl=list(maxfun=2e6), check.nobs.vs.nRE = "ignore")
 
-m3<-lmer(
+#####################################
+#####################################
+
+# Refitted LMER 
+# - Excluding outliers; high influence; high leverage observations and participants 
+# - Heavylmer: Lmer for heavy-tailed residuals
+
+#####################################
+#####################################
+
+### traditional lmer approach ####
+
+
+## without derivatives check
+control <- lmerControl(optimizer ="Nelder_Mead", calc.derivs=FALSE, optCtrl=list(maxfun=2e6), check.nobs.vs.nRE = "ignore")
+
+m3 <-lmer(
     sentimentScore ~ 1 + sexC*ethnicityC + (1 + sexC*ethnicityC|participantId), 
     data = df.filtered,
     control=control)
 
 summary(m3)
 
+### get coefficient table for reporting
+tab_model(m3, file = "lmer_output/lmer_refit_summary_forced_uw_students.html")
+tab_model(m3, file = "../../emotions_dashboard/data/lmer_refit_summary_forced_uw_students.html")
+
 ## Type III anova table with p-values for F-tests based on Satterthwaite's
 ## method:
-(aov <- anova(m3))
+(aov.m3 <- anova(m3))
+
+aov.apa.m3 <- kable(aov.m3, digits = 3, format = "html", caption = "ANOVA table for refitted LMER coefficients")
+cat(aov.apa.m3, file = "lmer_output/anova_lmer_refit_summary_forced_uw_students.html")
+cat(aov.apa.m3, file = "../../emotions_dashboard/data/anova_lmer_refit_summary_forced_uw_students.html")
+
+
+### heavy tailed student-family approach ####
+library(heavy)
+# https://cran.r-project.org/web/packages/heavy/heavy.pdf
+
+
+m3.heavy <- heavyLme(sentimentScore ~ 1+ sexC*ethnicityC,
+                     random = ~ 1 + sexC*ethnicityC,
+                     groups= ~ participantId,
+                     data = df.filtered,
+                     family = Student(df = 4))
+
+summary(m3.heavy)
+
+### get coefficient table for reporting
+tab_model(m3.heavy, file = "lmer_output/lmer_heavy_summary_forced_uw_students.html")
+tab_model(m3.heavy, file = "../../emotions_dashboard/data/lmer_heavy_summary_forced_uw_students.html")
+
 
 #### UPDATE #####
+# 
+# p = ggplot(df.filtered,aes(sex,sentimentScore,color=ethnicity,group=ethnicity))+
+#     geom_point()+
+#     geom_smooth(method="lm", se=F)+
+#     facet_wrap(~participantId)+
+#     theme_bw()
+# 
+# pngfile <- fs::path(knitr::fig_path(),  "scaling_2.png")
+# agg_png(pngfile, width = 60, height = 60, units = "cm", res = 300, scaling = 2.5)
+# plot(p)
+# invisible(dev.off())
+# knitr::include_graphics(pngfile)
+# 
+# df.filtered$Model.F.Res<- residuals(m3) #extracts the residuals and places them in a new column in our original data table
+# df.filtered$Abs.Model.F.Res <-abs(df.filtered$Model.F.Res) #creates a new column with the absolute value of the residuals
+# df.filtered$Model.F.Res2 <- df.filtered$Abs.Model.F.Res^2 #squares the absolute values of the residuals to provide the more robust estimate
+# Levene.Model.F <- lm(Model.F.Res2 ~ participantId, data=df.filtered) #ANOVA of the squared residuals
+# anova(Levene.Model.F) #displays the results
+# 
+# Plot.Model.F <- plot(m3) #creates a fitted vs residual plot
+# Plot.Model.F
+# 
+# resid1.filtered <- hlm_resid(m3, level = 1, standardize = TRUE)
+# 
+# head(resid1.filtered)
+# 
+# ggplot(data = resid1.filtered, aes(x = participantId, y = .std.ls.resid)) + 
+#   geom_point(alpha = 0.2) +
+#   geom_smooth(method = "loess", se = FALSE) + 
+#   labs(y = "LS level-1 residuals", 
+#        title = "LS residuals by participant ID")
+# 
+# resid2.filtered = hlm_resid(m3, level = "participantId", standardize = TRUE, include.ls = FALSE)
+# 
+# ggplot(data = resid2.filtered, aes(x = participantId, y = .std.ranef.intercept)) + 
+#   geom_point(alpha = 0.4) +
+#   geom_smooth(method = "loess", se = FALSE) + 
+#   labs(y = "Level-2 residuals", 
+#        title = "L2 residuals by participant ID")
+# 
+# ggplot(data = resid2.filtered, aes(x = participantId, y = .std.ranef.sex_c)) + 
+#   geom_point(alpha = 0.4) +
+#   geom_smooth(method = "loess", se = FALSE) + 
+#   labs(y = "Level-2 residuals", 
+#        title = "L2 residuals by participant ID")
+# 
+# ggplot(data = resid2.filtered, aes(x = participantId, y = .std.ranef.ethnicity_c)) + 
+#   geom_point(alpha = 0.4) +
+#   geom_smooth(method = "loess", se = FALSE) + 
+#   labs(y = "Level-2 residuals", 
+#        title = "L2 residuals by participant ID")
+# 
+# ggplot(data = resid2.filtered, aes(x = participantId, y = .std.ranef.sex_c_ethnicity_c)) + 
+#   geom_point(alpha = 0.4) +
+#   geom_smooth(method = "loess", se = FALSE) + 
+#   labs(y = "Level-2 residuals", 
+#        title = "L2 residuals by participant ID")
+# 
+# qqmath(m3, id=0.05) #id: identifies values that may be exerting undue influence on the model (i.e. outliers)
+# 
+# resid_panel(m3)
+# 
+# infl.filtered <- hlm_influence(m3, level = 1)
+# 
+# CutOff = 4/nrow(infl.filtered)
+# print(CutOff)
+# 
+# 
+# dotplot_diag(infl.filtered$cooksd, name = "cooks.distance", cutoff = CutOff)
+# 
+# high_cooksd_filtered = infl.filtered[infl.filtered$cooksd > CutOff, ] %>%
+#   arrange(desc(cooksd))
+# high_cooksd_filtered
+# 
+# infl.classes.filtered <- hlm_influence(m3, level = "participantId")
+# 
+# CutOffGroupFiltered = 4/48
+# CutOffGroupFiltered
+# 
+# dotplot_diag(infl.classes.filtered$cooksd, name = "cooks.distance", cutoff = CutOffGroupFiltered, modify = "dotplot")
 
-p = ggplot(df.filtered,aes(sex,sentimentScore,color=ethnicity,group=ethnicity))+
-    geom_point()+
-    geom_smooth(method="lm", se=F)+
-    facet_wrap(~participantId)+
-    theme_bw()
 
-pngfile <- fs::path(knitr::fig_path(),  "scaling_2.png")
-agg_png(pngfile, width = 60, height = 60, units = "cm", res = 300, scaling = 2.5)
-plot(p)
-invisible(dev.off())
-knitr::include_graphics(pngfile)
+###################################
+###################################
 
-df.filtered$Model.F.Res<- residuals(m3) #extracts the residuals and places them in a new column in our original data table
-df.filtered$Abs.Model.F.Res <-abs(df.filtered$Model.F.Res) #creates a new column with the absolute value of the residuals
-df.filtered$Model.F.Res2 <- df.filtered$Abs.Model.F.Res^2 #squares the absolute values of the residuals to provide the more robust estimate
-Levene.Model.F <- lm(Model.F.Res2 ~ participantId, data=df.filtered) #ANOVA of the squared residuals
-anova(Levene.Model.F) #displays the results
+# ANOVA 2x2 approach 
 
-Plot.Model.F <- plot(m3) #creates a fitted vs residual plot
-Plot.Model.F
+###################################
+###################################
 
-resid1.filtered <- hlm_resid(m3, level = 1, standardize = TRUE)
-
-head(resid1.filtered)
-
-ggplot(data = resid1.filtered, aes(x = participantId, y = .std.ls.resid)) + 
-  geom_point(alpha = 0.2) +
-  geom_smooth(method = "loess", se = FALSE) + 
-  labs(y = "LS level-1 residuals", 
-       title = "LS residuals by participant ID")
-
-resid2.filtered = hlm_resid(m3, level = "participantId", standardize = TRUE, include.ls = FALSE)
-
-ggplot(data = resid2.filtered, aes(x = participantId, y = .std.ranef.intercept)) + 
-  geom_point(alpha = 0.4) +
-  geom_smooth(method = "loess", se = FALSE) + 
-  labs(y = "Level-2 residuals", 
-       title = "L2 residuals by participant ID")
-
-ggplot(data = resid2.filtered, aes(x = participantId, y = .std.ranef.sex_c)) + 
-  geom_point(alpha = 0.4) +
-  geom_smooth(method = "loess", se = FALSE) + 
-  labs(y = "Level-2 residuals", 
-       title = "L2 residuals by participant ID")
-
-ggplot(data = resid2.filtered, aes(x = participantId, y = .std.ranef.ethnicity_c)) + 
-  geom_point(alpha = 0.4) +
-  geom_smooth(method = "loess", se = FALSE) + 
-  labs(y = "Level-2 residuals", 
-       title = "L2 residuals by participant ID")
-
-ggplot(data = resid2.filtered, aes(x = participantId, y = .std.ranef.sex_c_ethnicity_c)) + 
-  geom_point(alpha = 0.4) +
-  geom_smooth(method = "loess", se = FALSE) + 
-  labs(y = "Level-2 residuals", 
-       title = "L2 residuals by participant ID")
-
-qqmath(m3, id=0.05) #id: identifies values that may be exerting undue influence on the model (i.e. outliers)
-
-resid_panel(m3)
-
-infl.filtered <- hlm_influence(m3, level = 1)
-
-CutOff = 4/nrow(infl.filtered)
-print(CutOff)
-
-
-dotplot_diag(infl.filtered$cooksd, name = "cooks.distance", cutoff = CutOff)
-
-high_cooksd_filtered = infl.filtered[infl.filtered$cooksd > CutOff, ] %>%
-  arrange(desc(cooksd))
-high_cooksd_filtered
-
-infl.classes.filtered <- hlm_influence(m3, level = "participantId")
-
-CutOffGroupFiltered = 4/48
-CutOffGroupFiltered
-
-dotplot_diag(infl.classes.filtered$cooksd, name = "cooks.distance", cutoff = CutOffGroupFiltered, modify = "dotplot")
 
 library(rstatix)
 library(ggpubr)
