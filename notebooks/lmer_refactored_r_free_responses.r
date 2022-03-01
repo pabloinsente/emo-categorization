@@ -19,7 +19,6 @@ library(webshot)
 library(equatiomatic)
 library(svglite)
 library(knitr)
-library(robustlmm)
 
 df = read_csv("../clean_data/free_labeling_emotion_uw_students_long_format_lmer.csv")
 
@@ -171,22 +170,22 @@ anova(sex.only.model, ethnicity.only.model, sex.ethnicity.additive.model, full.i
 (aov.comparison <- anova(sex.only.model, ethnicity.only.model, sex.ethnicity.additive.model, full.interactive.model))
 
 aov.apa.com <- kable(aov.comparison, digits = 3, format = "html", caption = "ANOVA table for model comparison")
-cat(aov.apa.com, file = "lmer_output/anova_comparison_lmer_summary_forced_uw_students.html")
-cat(aov.apa.com, file = "../../emotions_dashboard/data/anova_comparison_lmer_summary_forced_uw_students.html")
+cat(aov.apa.com, file = "lmer_output/anova_comparison_lmer_summary_free_uw_students.html")
+cat(aov.apa.com, file = "../../emotions_dashboard/data/anova_comparison_lmer_summary_free_uw_students.html")
 
 
 ### get mathematical formula
 formula_lmer <- extract_eq(m2)
 
-cat(formula_lmer, file = "lmer_output/formula_lmer_summary_forced_uw_students.txt")
-cat(formula_lmer, file = "../../emotions_dashboard/data/formula_lmer_summary_forced_uw_students.txt")
+cat(formula_lmer, file = "lmer_output/formula_lmer_summary_free_uw_students.txt")
+cat(formula_lmer, file = "../../emotions_dashboard/data/formula_lmer_summary_free_uw_students.txt")
 
 #extract_eq(m2, use_coefs = TRUE)
 
 
 ### get coefficient table for reporting
-tab_model(m2, file = "lmer_output/lmer_summary_forced_uw_students.html")
-tab_model(m2, file = "../../emotions_dashboard/data/lmer_summary_forced_uw_students.html")
+tab_model(m2, file = "lmer_output/lmer_summary_free_uw_students.html")
+tab_model(m2, file = "../../emotions_dashboard/data/lmer_summary_free_uw_students.html")
 
 
 ## Type III anova table with p-values for F-tests based on Satterthwaite's method
@@ -194,8 +193,8 @@ tab_model(m2, file = "../../emotions_dashboard/data/lmer_summary_forced_uw_stude
 (aov <- anova(m2))
 
 aov.apa <- kable(aov, digits = 3, format = "html", caption = "ANOVA table for LMER coefficients")
-cat(aov.apa, file = "lmer_output/anova_lmer_summary_forced_uw_students.html")
-cat(aov.apa, file = "../../emotions_dashboard/data/anova_lmer_summary_forced_uw_students.html")
+cat(aov.apa, file = "lmer_output/anova_lmer_summary_free_uw_students.html")
+cat(aov.apa, file = "../../emotions_dashboard/data/anova_lmer_summary_free_uw_students.html")
 
 
 #####################################
@@ -246,8 +245,8 @@ p = ggplot(df,aes(sex,sentimentScore,color=ethnicity,group=ethnicity))+
 p
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/participants_charts_lmer_forced_uw_students.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/participants_charts_lmer_forced_uw_students.txt")
+cat(svg.string.plot, file = "lmer_output/participants_charts_lmer_free_uw_students.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/participants_charts_lmer_free_uw_students.txt")
 
 dev.off()
 
@@ -275,8 +274,8 @@ format(4.440288e-07, scientific = F)
 # save to html table
 aov.btw.res <- kable(anova(Levene.Model.F), digits = 3, format = "html", caption = "ANOVA table for between subjects residuals")
 
-cat(aov.btw.res, file = "lmer_output/anova_bwt_res_summary_forced_uw_students.html")
-cat(aov.btw.res, file = "../../emotions_dashboard/data/anova_bwt_res_summary_forced_uw_students.html")
+cat(aov.btw.res, file = "lmer_output/anova_bwt_res_summary_free_uw_students.html")
+cat(aov.btw.res, file = "../../emotions_dashboard/data/anova_bwt_res_summary_free_uw_students.html")
 
 
 # Since the p value < 0.05, we can say that the variance of the residuals is equal and 
@@ -288,8 +287,8 @@ s <- svgstring(width = 7,
 Plot.Model.F <- plot(m2) #creates a fitted vs residual plot
 Plot.Model.F
 Plot.Model.F <- s()
-cat(Plot.Model.F , file = "lmer_output/fitted_vs_residual_plot_forced_uw_students.txt")
-cat(Plot.Model.F , file = "../../emotions_dashboard/data/fitted_vs_residual_plot_forced_uw_students.txt")
+cat(Plot.Model.F , file = "lmer_output/fitted_vs_residual_plot_free_uw_students.txt")
+cat(Plot.Model.F , file = "../../emotions_dashboard/data/fitted_vs_residual_plot_free_uw_students.txt")
 dev.off()
 
 ## This looks very unsystematic
@@ -306,8 +305,8 @@ ggplot(data = resid1, aes(x = participantId, y = .std.ls.resid)) +
        title = "Least-Squares residuals by participant ID")
 
 l1.res <- s()
-cat(l1.res , file = "lmer_output/l1_res_plot_forced_uw_students.txt")
-cat(l1.res , file = "../../emotions_dashboard/data/l1_res_plot_forced_uw_students.txt")
+cat(l1.res , file = "lmer_output/l1_res_plot_free_uw_students.txt")
+cat(l1.res , file = "../../emotions_dashboard/data/l1_res_plot_free_uw_students.txt")
 dev.off()
 
 ## There are quite a couple of large residuals 
@@ -324,8 +323,8 @@ ggplot(data = resid2, aes(x = participantId, y = .std.ranef.intercept)) +
        title = "Intercept random effects against participant ID")
 
 l2.res.int <- s()
-cat(l2.res.int , file = "lmer_output/l2_int_res_plot_forced_uw_students.txt")
-cat(l2.res.int , file = "../../emotions_dashboard/data/l2_int_res_plot_forced_uw_students.txt")
+cat(l2.res.int , file = "lmer_output/l2_int_res_plot_free_uw_students.txt")
+cat(l2.res.int , file = "../../emotions_dashboard/data/l2_int_res_plot_free_uw_students.txt")
 dev.off()
 
 # 43, 9, 16
@@ -368,8 +367,8 @@ s <- svgstring(width = 7,
                height = 5)
 qqmath(m2, id=0.05) #id: identifies values that may be exerting undue influence on the model (i.e. outliers)
 svg.qqplot <- s()
-cat(svg.qqplot, file = "lmer_output/qqplot_lmer_forced_uw_students.txt")
-cat(svg.qqplot, file = "../../emotions_dashboard/data/qqplot_lmer_forced_uw_students.txt")
+cat(svg.qqplot, file = "lmer_output/qqplot_lmer_free_uw_students.txt")
+cat(svg.qqplot, file = "../../emotions_dashboard/data/qqplot_lmer_free_uw_students.txt")
 dev.off()
 
 
@@ -398,8 +397,8 @@ s <- svgstring(width = 7,
 # dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = "internal")
 dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = CutOff)
 svg.string.plot <- s()
-cat(svg.string.plot, file = "lmer_output/influence_datapoints_lmer_forced_uw_students.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_datapoints_lmer_forced_uw_students.txt")
+cat(svg.string.plot, file = "lmer_output/influence_datapoints_lmer_free_uw_students.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_datapoints_lmer_free_uw_students.txt")
 dev.off()
 
 
@@ -424,8 +423,8 @@ s <- svgstring(width = 7,
 dotplot_diag(infl.classes$cooksd, name = "cooks.distance", cutoff = CutOffGroup, modify = "dotplot")
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/influence_participants_lmer_forced_uw_students.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_participants_lmer_forced_uw_students.txt")
+cat(svg.string.plot, file = "lmer_output/influence_participants_lmer_free_uw_students.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_participants_lmer_free_uw_students.txt")
 dev.off()
 
 
@@ -454,8 +453,8 @@ s <- svgstring(width = 7,
 dotplot_diag(infl$leverage.overall, name = "leverage", cutoff = CutOffLeverage)
 
 svg.string.plot <- s()
-cat(svg.string.plot, file = "lmer_output/leverage_datapoints_lmer_forced_uw_students.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/leverage_datapoints_lmer_forced_uw_students.txt")
+cat(svg.string.plot, file = "lmer_output/leverage_datapoints_lmer_free_uw_students.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/leverage_datapoints_lmer_free_uw_students.txt")
 dev.off()
 
 high_leverage = infl[infl$leverage.overall > CutOffLeverage, ] %>%
@@ -478,8 +477,8 @@ s <- svgstring(width = 7,
 dotplot_diag(infl.classes$leverage.overall, name = "leverage", cutoff = CutOffLeverageParticipants)
 
 svg.string.plot <- s()
-cat(svg.string.plot, file = "lmer_output/leverage_participants_lmer_forced_uw_students.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/leverage_participants_lmer_forced_uw_students.txt")
+cat(svg.string.plot, file = "lmer_output/leverage_participants_lmer_free_uw_students.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/leverage_participants_lmer_free_uw_students.txt")
 dev.off()
 
 
@@ -533,35 +532,36 @@ m3 <-lmer(
 
 summary(m3)
 
+
 ### get coefficient table for reporting
-tab_model(m3, file = "lmer_output/lmer_refit_summary_forced_uw_students.html")
-tab_model(m3, file = "../../emotions_dashboard/data/lmer_refit_summary_forced_uw_students.html")
+tab_model(m3, file = "lmer_output/lmer_refit_summary_free_uw_students.html")
+tab_model(m3, file = "../../emotions_dashboard/data/lmer_refit_summary_free_uw_students.html")
 
 ## Type III anova table with p-values for F-tests based on Satterthwaite's
 ## method:
 (aov.m3 <- anova(m3))
 
 aov.apa.m3 <- kable(aov.m3, digits = 3, format = "html", caption = "ANOVA table for refitted LMER coefficients")
-cat(aov.apa.m3, file = "lmer_output/anova_lmer_refit_summary_forced_uw_students.html")
-cat(aov.apa.m3, file = "../../emotions_dashboard/data/anova_lmer_refit_summary_forced_uw_students.html")
+cat(aov.apa.m3, file = "lmer_output/anova_lmer_refit_summary_free_uw_students.html")
+cat(aov.apa.m3, file = "../../emotions_dashboard/data/anova_lmer_refit_summary_free_uw_students.html")
 
 
-### heavy tailed student-family approach ####
-library(heavy)
-# https://cran.r-project.org/web/packages/heavy/heavy.pdf
-
-
-m3.heavy <- heavyLme(sentimentScore ~ 1+ sexC*ethnicityC,
-                     random = ~ 1 + sexC*ethnicityC,
-                     groups= ~ participantId,
-                     data = df.filtered,
-                     family = Student(df = 4))
-
-summary(m3.heavy)
-
-### get coefficient table for reporting
-tab_model(m3.heavy, file = "lmer_output/lmer_heavy_summary_forced_uw_students.html")
-tab_model(m3.heavy, file = "../../emotions_dashboard/data/lmer_heavy_summary_forced_uw_students.html")
+# ### heavy tailed student-family approach ####
+# library(heavy)
+# # https://cran.r-project.org/web/packages/heavy/heavy.pdf
+# 
+# 
+# m3.heavy <- heavyLme(sentimentScore ~ 1+ sexC*ethnicityC,
+#                      random = ~ 1 + sexC*ethnicityC,
+#                      groups= ~ participantId,
+#                      data = df.filtered,
+#                      family = Student(df = 4))
+# 
+# summary(m3.heavy)
+# 
+# ### get coefficient table for reporting
+# tab_model(m3.heavy, file = "lmer_output/lmer_heavy_summary_free_uw_students.html")
+# tab_model(m3.heavy, file = "../../emotions_dashboard/data/lmer_heavy_summary_free_uw_students.html")
 
 
 #### UPDATE #####
@@ -655,57 +655,57 @@ tab_model(m3.heavy, file = "../../emotions_dashboard/data/lmer_heavy_summary_for
 ###################################
 ###################################
 
-
-library(rstatix)
-library(ggpubr)
-library(ez) 
-
-df %>%
-  group_by(sex, ethnicity) %>%
-  get_summary_stats(sentimentScore, type = "mean_sd")
-
-bxp.sex <- ggboxplot(
-    df, 
-    x = "sex",
-    y = "sentimentScore",
-    palette = "jco"
-  )
-bxp.sex
-
-bxp.ethnicity <- ggboxplot(
-    df, 
-    x = "ethnicity",
-    y = "sentimentScore",
-    palette = "jco"
-  )
-bxp.ethnicity
-
-bxp <- ggboxplot(
-    df,
-    x = "sex",
-    y = "sentimentScore",
-    color = "ethnicity",
-    palette = "jco"
-  )
-bxp
-
-df %>%
-  group_by(ethnicity, sex) %>%
-  identify_outliers(sentimentScore)
-
-# no outliers
-
-df %>%
-  group_by(ethnicity, sex) %>%
-  shapiro_test(sentimentScore)
-
-# not normal
-
-ggqqplot(df, "sentimentScore", ggtheme = theme_bw()) +
-  facet_grid(sex ~ ethnicity, labeller = "label_both")
-
-res.aov  = ezANOVA(data=df,
-                   wid=.(participantId), 
-                   dv=.(sentimentScore), 
-                   within=.(sex, ethnicity))
-res.aov  
+# 
+# library(rstatix)
+# library(ggpubr)
+# library(ez) 
+# 
+# df %>%
+#   group_by(sex, ethnicity) %>%
+#   get_summary_stats(sentimentScore, type = "mean_sd")
+# 
+# bxp.sex <- ggboxplot(
+#     df, 
+#     x = "sex",
+#     y = "sentimentScore",
+#     palette = "jco"
+#   )
+# bxp.sex
+# 
+# bxp.ethnicity <- ggboxplot(
+#     df, 
+#     x = "ethnicity",
+#     y = "sentimentScore",
+#     palette = "jco"
+#   )
+# bxp.ethnicity
+# 
+# bxp <- ggboxplot(
+#     df,
+#     x = "sex",
+#     y = "sentimentScore",
+#     color = "ethnicity",
+#     palette = "jco"
+#   )
+# bxp
+# 
+# df %>%
+#   group_by(ethnicity, sex) %>%
+#   identify_outliers(sentimentScore)
+# 
+# # no outliers
+# 
+# df %>%
+#   group_by(ethnicity, sex) %>%
+#   shapiro_test(sentimentScore)
+# 
+# # not normal
+# 
+# ggqqplot(df, "sentimentScore", ggtheme = theme_bw()) +
+#   facet_grid(sex ~ ethnicity, labeller = "label_both")
+# 
+# res.aov  = ezANOVA(data=df,
+#                    wid=.(participantId), 
+#                    dv=.(sentimentScore), 
+#                    within=.(sex, ethnicity))
+# res.aov  
