@@ -20,7 +20,7 @@ library(equatiomatic)
 library(svglite)
 library(knitr)
 
-df = read_csv("../clean_data/free_labeling_emotion_uw_students_long_format_lmer.csv")
+df = read_csv("../clean_data_mturk/free_labeling_emotion_mturk_long_format_lmer.csv")
 
 
 ########################
@@ -144,6 +144,8 @@ m2.sex <-lmer(
 summary(m2.sex)
 anova(m2, m2.sex)
 
+# m2 is better
+
 m2.ethnicityC <-lmer(
   sentimentScore ~ 1 + ethnicityC + (1+ sexC*ethnicityC |participantId), 
   data = df,
@@ -152,6 +154,8 @@ m2.ethnicityC <-lmer(
 summary(m2.ethnicityC)
 anova(m2, m2.ethnicityC)
 
+# m2 is better
+
 m2.add <-lmer(
   sentimentScore ~ 1 + sexC+ethnicityC + (1+sexC*ethnicityC |participantId), 
   data = df,
@@ -159,6 +163,8 @@ m2.add <-lmer(
 
 summary(m2.add)
 anova(m2, m2.add)
+
+# m2 is better
 
 full.interactive.model <- m2
 sex.only.model <- m2.sex
@@ -170,22 +176,22 @@ anova(sex.only.model, ethnicity.only.model, sex.ethnicity.additive.model, full.i
 (aov.comparison <- anova(sex.only.model, ethnicity.only.model, sex.ethnicity.additive.model, full.interactive.model))
 
 aov.apa.com <- kable(aov.comparison, digits = 3, format = "html", caption = "ANOVA table for model comparison")
-cat(aov.apa.com, file = "lmer_output/anova_comparison_lmer_summary_free_uw_students.html")
-cat(aov.apa.com, file = "../../emotions_dashboard/data/anova_comparison_lmer_summary_free_uw_students.html")
+cat(aov.apa.com, file = "lmer_output/anova_comparison_lmer_summary_free_mturk.html")
+cat(aov.apa.com, file = "../../emotions_dashboard/data/anova_comparison_lmer_summary_free_mturk.html")
 
 
 ### get mathematical formula
 formula_lmer <- extract_eq(m2)
 
-cat(formula_lmer, file = "lmer_output/formula_lmer_summary_free_uw_students.txt")
-cat(formula_lmer, file = "../../emotions_dashboard/data/formula_lmer_summary_free_uw_students.txt")
+cat(formula_lmer, file = "lmer_output/formula_lmer_summary_free_mturk.txt")
+cat(formula_lmer, file = "../../emotions_dashboard/data/formula_lmer_summary_free_mturk.txt")
 
 #extract_eq(m2, use_coefs = TRUE)
 
 
 ### get coefficient table for reporting
-tab_model(m2, file = "lmer_output/lmer_summary_free_uw_students.html")
-tab_model(m2, file = "../../emotions_dashboard/data/lmer_summary_free_uw_students.html")
+tab_model(m2, file = "lmer_output/lmer_summary_free_mturk.html")
+tab_model(m2, file = "../../emotions_dashboard/data/lmer_summary_free_mturk.html")
 
 
 ## Type III anova table with p-values for F-tests based on Satterthwaite's method
@@ -193,8 +199,8 @@ tab_model(m2, file = "../../emotions_dashboard/data/lmer_summary_free_uw_student
 (aov <- anova(m2))
 
 aov.apa <- kable(aov, digits = 3, format = "html", caption = "ANOVA table for LMER coefficients")
-cat(aov.apa, file = "lmer_output/anova_lmer_summary_free_uw_students.html")
-cat(aov.apa, file = "../../emotions_dashboard/data/anova_lmer_summary_free_uw_students.html")
+cat(aov.apa, file = "lmer_output/anova_lmer_summary_free_mturk.html")
+cat(aov.apa, file = "../../emotions_dashboard/data/anova_lmer_summary_free_mturk.html")
 
 
 #####################################
@@ -245,8 +251,8 @@ p = ggplot(df,aes(sex,sentimentScore,color=ethnicity,group=ethnicity))+
 p
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/participants_charts_lmer_free_uw_students.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/participants_charts_lmer_free_uw_students.txt")
+cat(svg.string.plot, file = "lmer_output/participants_charts_lmer_free_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/participants_charts_lmer_free_mturk.txt")
 
 dev.off()
 
@@ -274,8 +280,8 @@ format(4.440288e-07, scientific = F)
 # save to html table
 aov.btw.res <- kable(anova(Levene.Model.F), digits = 3, format = "html", caption = "ANOVA table for between subjects residuals")
 
-cat(aov.btw.res, file = "lmer_output/anova_bwt_res_summary_free_uw_students.html")
-cat(aov.btw.res, file = "../../emotions_dashboard/data/anova_bwt_res_summary_free_uw_students.html")
+cat(aov.btw.res, file = "lmer_output/anova_bwt_res_summary_free_mturk.html")
+cat(aov.btw.res, file = "../../emotions_dashboard/data/anova_bwt_res_summary_free_mturk.html")
 
 
 # Since the p value < 0.05, we can say that the variance of the residuals is equal and 
@@ -287,8 +293,8 @@ s <- svgstring(width = 7,
 Plot.Model.F <- plot(m2) #creates a fitted vs residual plot
 Plot.Model.F
 Plot.Model.F <- s()
-cat(Plot.Model.F , file = "lmer_output/fitted_vs_residual_plot_free_uw_students.txt")
-cat(Plot.Model.F , file = "../../emotions_dashboard/data/fitted_vs_residual_plot_free_uw_students.txt")
+cat(Plot.Model.F , file = "lmer_output/fitted_vs_residual_plot_free_mturk.txt")
+cat(Plot.Model.F , file = "../../emotions_dashboard/data/fitted_vs_residual_plot_free_mturk.txt")
 dev.off()
 
 ## This looks very unsystematic
@@ -305,8 +311,8 @@ ggplot(data = resid1, aes(x = participantId, y = .std.ls.resid)) +
        title = "Least-Squares residuals by participant ID")
 
 l1.res <- s()
-cat(l1.res , file = "lmer_output/l1_res_plot_free_uw_students.txt")
-cat(l1.res , file = "../../emotions_dashboard/data/l1_res_plot_free_uw_students.txt")
+cat(l1.res , file = "lmer_output/l1_res_plot_free_mturk.txt")
+cat(l1.res , file = "../../emotions_dashboard/data/l1_res_plot_free_mturk.txt")
 dev.off()
 
 ## There are quite a couple of large residuals 
@@ -323,36 +329,9 @@ ggplot(data = resid2, aes(x = participantId, y = .std.ranef.intercept)) +
        title = "Intercept random effects against participant ID")
 
 l2.res.int <- s()
-cat(l2.res.int , file = "lmer_output/l2_int_res_plot_free_uw_students.txt")
-cat(l2.res.int , file = "../../emotions_dashboard/data/l2_int_res_plot_free_uw_students.txt")
+cat(l2.res.int , file = "lmer_output/l2_int_res_plot_free_mturk.txt")
+cat(l2.res.int , file = "../../emotions_dashboard/data/l2_int_res_plot_free_mturk.txt")
 dev.off()
-
-# 43, 9, 16
-# 
-# ggplot(data = resid2, aes(x = participantId, y = .std.ranef.sex_c)) + 
-#   geom_point(alpha = 0.4) +
-#   geom_smooth(method = "loess", se = FALSE) + 
-#   labs(y = "Level-2 residuals", 
-#        title = "L2 residuals by participant ID")
-
-# 9, 16
-# 
-#     ggplot(data = resid2, aes(x = participantId, y = .std.ranef.ethnicity_c)) + 
-#   geom_point(alpha = 0.4) +
-#   geom_smooth(method = "loess", se = FALSE) + 
-#   labs(y = "Level-2 residuals", 
-#        title = "L2 residuals by participant ID")
-
-# 43
-# 
-# ggplot(data = resid2, aes(x = participantId, y = .std.ranef.sex_c_ethnicity_c)) + 
-#   geom_point(alpha = 0.4) +
-#   geom_smooth(method = "loess", se = FALSE) + 
-#   labs(y = "Level-2 residuals", 
-#        title = "L2 residuals by participant ID")
-
-# 43, 9
-
 
 #####################################
 #####################################
@@ -367,15 +346,9 @@ s <- svgstring(width = 7,
                height = 5)
 qqmath(m2, id=0.05) #id: identifies values that may be exerting undue influence on the model (i.e. outliers)
 svg.qqplot <- s()
-cat(svg.qqplot, file = "lmer_output/qqplot_lmer_free_uw_students.txt")
-cat(svg.qqplot, file = "../../emotions_dashboard/data/qqplot_lmer_free_uw_students.txt")
+cat(svg.qqplot, file = "lmer_output/qqplot_lmer_free_mturk.txt")
+cat(svg.qqplot, file = "../../emotions_dashboard/data/qqplot_lmer_free_mturk.txt")
 dev.off()
-
-
-# looks not normal...
-# https://ademos.people.uic.edu/Chapter18.html
-
-# resid_panel(m2)
 
 
 #####################################
@@ -386,6 +359,13 @@ dev.off()
 #####################################
 #####################################
 
+
+#############################
+
+# check datapoints influence
+
+#############################
+
 infl <- hlm_influence(m2, level = 1)
 
 # IQR = as.numeric(format(IQR(infl$cooksd)*3, scientific = F))
@@ -394,11 +374,12 @@ print(CutOff)
 
 s <- svgstring(width = 7,
                height = 5)
+
 # dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = "internal")
 dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = CutOff)
 svg.string.plot <- s()
-cat(svg.string.plot, file = "lmer_output/influence_datapoints_lmer_free_uw_students.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_datapoints_lmer_free_uw_students.txt")
+cat(svg.string.plot, file = "lmer_output/influence_datapoints_lmer_free_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_datapoints_lmer_free_mturk.txt")
 dev.off()
 
 
@@ -407,9 +388,16 @@ high_cooksd = infl[infl$cooksd > CutOff, ] %>%
 
 head(high_cooksd, n=10)
 
-#### high influence data points
-
 high_cooksd$id
+
+#### id: 13412
+
+#############################
+
+# check participants influence
+
+#############################
+
 
 infl.classes <- hlm_influence(m2, level = "participantId")
 
@@ -423,8 +411,8 @@ s <- svgstring(width = 7,
 dotplot_diag(infl.classes$cooksd, name = "cooks.distance", cutoff = CutOffGroup, modify = "dotplot")
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/influence_participants_lmer_free_uw_students.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_participants_lmer_free_uw_students.txt")
+cat(svg.string.plot, file = "lmer_output/influence_participants_lmer_free_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_participants_lmer_free_mturk.txt")
 dev.off()
 
 
@@ -443,6 +431,13 @@ high_cooksd_participants
 #####################################
 #####################################
 
+
+#############################
+
+# check datapoints leverage
+
+#############################
+
 CutOffLeverage = mean(infl$leverage.overall)*3
 CutOffLeverage
 
@@ -453,8 +448,8 @@ s <- svgstring(width = 7,
 dotplot_diag(infl$leverage.overall, name = "leverage", cutoff = CutOffLeverage)
 
 svg.string.plot <- s()
-cat(svg.string.plot, file = "lmer_output/leverage_datapoints_lmer_free_uw_students.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/leverage_datapoints_lmer_free_uw_students.txt")
+cat(svg.string.plot, file = "lmer_output/leverage_datapoints_lmer_free_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/leverage_datapoints_lmer_free_mturk.txt")
 dev.off()
 
 high_leverage = infl[infl$leverage.overall > CutOffLeverage, ] %>%
@@ -465,6 +460,15 @@ high_leverage
 
 # high leverage data points
 high_leverage$id
+
+# none
+
+
+#############################
+
+# check participants leverage
+
+#############################
 
 CutOffLeverageParticipants = mean(infl.classes$leverage.overall)*3
 CutOffLeverageParticipants
@@ -477,8 +481,8 @@ s <- svgstring(width = 7,
 dotplot_diag(infl.classes$leverage.overall, name = "leverage", cutoff = CutOffLeverageParticipants)
 
 svg.string.plot <- s()
-cat(svg.string.plot, file = "lmer_output/leverage_participants_lmer_free_uw_students.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/leverage_participants_lmer_free_uw_students.txt")
+cat(svg.string.plot, file = "lmer_output/leverage_participants_lmer_free_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/leverage_participants_lmer_free_mturk.txt")
 dev.off()
 
 
@@ -495,16 +499,11 @@ df$id <- 1:nrow(df)
 
 high_cooksd$id
 
-high_leverage$id
-
-high_cooksd_participants$participantId
 
 nrow(df)
 
 `%ni%` <- Negate(`%in%`)
 df.filtered <- filter(df, id %ni% high_cooksd$id)
-df.filtered <- filter(df.filtered, id %ni% high_leverage$id)
-df.filtered <- filter(df.filtered, participantId != 43)
 
 nrow(df.filtered)
 
@@ -534,117 +533,16 @@ summary(m3)
 
 
 ### get coefficient table for reporting
-tab_model(m3, file = "lmer_output/lmer_refit_summary_free_uw_students.html")
-tab_model(m3, file = "../../emotions_dashboard/data/lmer_refit_summary_free_uw_students.html")
+tab_model(m3, file = "lmer_output/lmer_refit_summary_free_mturk.html")
+tab_model(m3, file = "../../emotions_dashboard/data/lmer_refit_summary_free_mturk.html")
 
 ## Type III anova table with p-values for F-tests based on Satterthwaite's
 ## method:
 (aov.m3 <- anova(m3))
 
 aov.apa.m3 <- kable(aov.m3, digits = 3, format = "html", caption = "ANOVA table for refitted LMER coefficients")
-cat(aov.apa.m3, file = "lmer_output/anova_lmer_refit_summary_free_uw_students.html")
-cat(aov.apa.m3, file = "../../emotions_dashboard/data/anova_lmer_refit_summary_free_uw_students.html")
-
-
-# ### heavy tailed student-family approach ####
-# library(heavy)
-# # https://cran.r-project.org/web/packages/heavy/heavy.pdf
-# 
-# 
-# m3.heavy <- heavyLme(sentimentScore ~ 1+ sexC*ethnicityC,
-#                      random = ~ 1 + sexC*ethnicityC,
-#                      groups= ~ participantId,
-#                      data = df.filtered,
-#                      family = Student(df = 4))
-# 
-# summary(m3.heavy)
-# 
-# ### get coefficient table for reporting
-# tab_model(m3.heavy, file = "lmer_output/lmer_heavy_summary_free_uw_students.html")
-# tab_model(m3.heavy, file = "../../emotions_dashboard/data/lmer_heavy_summary_free_uw_students.html")
-
-
-#### UPDATE #####
-# 
-# p = ggplot(df.filtered,aes(sex,sentimentScore,color=ethnicity,group=ethnicity))+
-#     geom_point()+
-#     geom_smooth(method="lm", se=F)+
-#     facet_wrap(~participantId)+
-#     theme_bw()
-# 
-# pngfile <- fs::path(knitr::fig_path(),  "scaling_2.png")
-# agg_png(pngfile, width = 60, height = 60, units = "cm", res = 300, scaling = 2.5)
-# plot(p)
-# invisible(dev.off())
-# knitr::include_graphics(pngfile)
-# 
-# df.filtered$Model.F.Res<- residuals(m3) #extracts the residuals and places them in a new column in our original data table
-# df.filtered$Abs.Model.F.Res <-abs(df.filtered$Model.F.Res) #creates a new column with the absolute value of the residuals
-# df.filtered$Model.F.Res2 <- df.filtered$Abs.Model.F.Res^2 #squares the absolute values of the residuals to provide the more robust estimate
-# Levene.Model.F <- lm(Model.F.Res2 ~ participantId, data=df.filtered) #ANOVA of the squared residuals
-# anova(Levene.Model.F) #displays the results
-# 
-# Plot.Model.F <- plot(m3) #creates a fitted vs residual plot
-# Plot.Model.F
-# 
-# resid1.filtered <- hlm_resid(m3, level = 1, standardize = TRUE)
-# 
-# head(resid1.filtered)
-# 
-# ggplot(data = resid1.filtered, aes(x = participantId, y = .std.ls.resid)) + 
-#   geom_point(alpha = 0.2) +
-#   geom_smooth(method = "loess", se = FALSE) + 
-#   labs(y = "LS level-1 residuals", 
-#        title = "LS residuals by participant ID")
-# 
-# resid2.filtered = hlm_resid(m3, level = "participantId", standardize = TRUE, include.ls = FALSE)
-# 
-# ggplot(data = resid2.filtered, aes(x = participantId, y = .std.ranef.intercept)) + 
-#   geom_point(alpha = 0.4) +
-#   geom_smooth(method = "loess", se = FALSE) + 
-#   labs(y = "Level-2 residuals", 
-#        title = "L2 residuals by participant ID")
-# 
-# ggplot(data = resid2.filtered, aes(x = participantId, y = .std.ranef.sex_c)) + 
-#   geom_point(alpha = 0.4) +
-#   geom_smooth(method = "loess", se = FALSE) + 
-#   labs(y = "Level-2 residuals", 
-#        title = "L2 residuals by participant ID")
-# 
-# ggplot(data = resid2.filtered, aes(x = participantId, y = .std.ranef.ethnicity_c)) + 
-#   geom_point(alpha = 0.4) +
-#   geom_smooth(method = "loess", se = FALSE) + 
-#   labs(y = "Level-2 residuals", 
-#        title = "L2 residuals by participant ID")
-# 
-# ggplot(data = resid2.filtered, aes(x = participantId, y = .std.ranef.sex_c_ethnicity_c)) + 
-#   geom_point(alpha = 0.4) +
-#   geom_smooth(method = "loess", se = FALSE) + 
-#   labs(y = "Level-2 residuals", 
-#        title = "L2 residuals by participant ID")
-# 
-# qqmath(m3, id=0.05) #id: identifies values that may be exerting undue influence on the model (i.e. outliers)
-# 
-# resid_panel(m3)
-# 
-# infl.filtered <- hlm_influence(m3, level = 1)
-# 
-# CutOff = 4/nrow(infl.filtered)
-# print(CutOff)
-# 
-# 
-# dotplot_diag(infl.filtered$cooksd, name = "cooks.distance", cutoff = CutOff)
-# 
-# high_cooksd_filtered = infl.filtered[infl.filtered$cooksd > CutOff, ] %>%
-#   arrange(desc(cooksd))
-# high_cooksd_filtered
-# 
-# infl.classes.filtered <- hlm_influence(m3, level = "participantId")
-# 
-# CutOffGroupFiltered = 4/48
-# CutOffGroupFiltered
-# 
-# dotplot_diag(infl.classes.filtered$cooksd, name = "cooks.distance", cutoff = CutOffGroupFiltered, modify = "dotplot")
+cat(aov.apa.m3, file = "lmer_output/anova_lmer_refit_summary_free_mturk.html")
+cat(aov.apa.m3, file = "../../emotions_dashboard/data/anova_lmer_refit_summary_free_mturk.html")
 
 
 ###################################
