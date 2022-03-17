@@ -19,6 +19,7 @@ library(webshot)
 library(equatiomatic)
 library(svglite)
 library(knitr)
+library(ordinal)
 
 df = read_csv("../clean_data/forced_choice_emotion_uw_students_long_format_lmer.csv")
 
@@ -187,6 +188,13 @@ sex.ethnicity.additive.model <- m2.add
 
 # full.interactive.model is better
 
+
+fixed.effmodel <- lm(sentimentScore ~ sexC * ethnicityC, data = df)
+
+summary(fixed.effmodel)
+anova(m2, fixed.effmodel)
+
+
 anova(sex.only.model, ethnicity.only.model, sex.ethnicity.additive.model, full.interactive.model)
 
 (aov.comparison <- anova(sex.only.model, ethnicity.only.model, sex.ethnicity.additive.model, full.interactive.model))
@@ -194,6 +202,7 @@ anova(sex.only.model, ethnicity.only.model, sex.ethnicity.additive.model, full.i
 aov.apa.com <- kable(aov.comparison, digits = 3, format = "html", caption = "ANOVA table for model comparison")
 cat(aov.apa.com, file = "lmer_output/anova_comparison_lmer_summary_forced_uw_students.html")
 cat(aov.apa.com, file = "../../emotions_dashboard/data/anova_comparison_lmer_summary_forced_uw_students.html")
+
 
 
 #####################################
