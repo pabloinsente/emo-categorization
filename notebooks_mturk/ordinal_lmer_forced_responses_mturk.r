@@ -46,7 +46,8 @@ dim(df)
 
 #####################################
 #####################################
-# 
+library(svglite)
+ 
 # display.brewer.pal(n = 10, name = "RdBu")
 # brewer.pal(n = 10, name = "RdBu")
 #  "#67001F" "#B2182B" "#D6604D" "#F4A582" "#FDDBC7" "#D1E5F0" "#92C5DE" "#4393C3" "#2166AC" "#053061"
@@ -56,26 +57,73 @@ RdBu8Alter <- c("#B2182B", "#D6604D", "#F7F7F7", "#D1E5F0", "#92C5DE", "#4393C3"
 
 ## chart for 2-way interaction SEX x ETHNICITY  
 
-df %>% mutate(emotionF = ordered(emotionF, levels=rev(levels(emotionF)))) %>% ggplot( aes(x = sexF, fill = emotionF)) + 
+two_way_sex_ethnicity <- df %>% 
+  mutate(emotionF = ordered(emotionF, levels=rev(levels(emotionF)))) %>% 
+  ggplot( aes(x = sexF, fill = emotionF)) + 
   geom_bar(position = "fill") +
   facet_grid(. ~ethnicityF) + 
+  labs(y = "proportion", x = "sex", fill ="emotion") + 
   scale_fill_manual(values = RdBu8Alter) + 
   theme_minimal()
 
+two_way_sex_ethnicity
+
+
+s <- svgstring(width = 7,
+               height = 5)
+
+two_way_sex_ethnicity
+
+chart <- s()
+cat(chart , file = "lmer_output/sex_ethnicity_forced_mturk.txt")
+cat(chart , file = "../../emotions_dashboard/data/sex_ethnicity_forced_mturk.txt")
+dev.off()
 
 ## chart for effect of sex
 
-df %>% mutate(emotionF = ordered(emotionF, levels=rev(levels(emotionF)))) %>% ggplot( aes(x = sexF, fill = emotionF)) + 
+sex_chart <- df %>% 
+  mutate(emotionF = ordered(emotionF, levels=rev(levels(emotionF)))) %>% 
+  ggplot( aes(x = sexF, fill = emotionF)) + 
   geom_bar(position = "fill") +
+  labs(y = "proportion", x = "sex", fill ="emotion") + 
   scale_fill_manual(values = RdBu8Alter) + 
   theme_minimal()
+
+sex_chart
+
+
+s <- svgstring(width = 7,
+               height = 5)
+
+sex_chart
+
+chart <- s()
+cat(chart , file = "lmer_output/sex_forced_mturk.txt")
+cat(chart , file = "../../emotions_dashboard/data/sex_forced_mturk.txt")
+dev.off()
 
 ## chart for effect of ethnicity
 
-df %>% mutate(emotionF = ordered(emotionF, levels=rev(levels(emotionF)))) %>% ggplot( aes(x = ethnicityF, fill = emotionF)) + 
+et_chart <- df %>% 
+  mutate(emotionF = ordered(emotionF, levels=rev(levels(emotionF)))) %>% 
+  ggplot( aes(x = ethnicityF, fill = emotionF)) + 
   geom_bar(position = "fill") +
+  labs(y = "proportion", x = "ethnicity", fill ="emotion") + 
   scale_fill_manual(values = RdBu8Alter) + 
   theme_minimal()
+
+
+et_chart
+
+s <- svgstring(width = 7,
+               height = 5)
+
+et_chart
+
+chart <- s()
+cat(chart , file = "lmer_output/ethnicity_forced_mturk.txt")
+cat(chart , file = "../../emotions_dashboard/data/ethnicity_forced_mturk.txt")
+dev.off()
 
 
 aggregate(x = df$sentimentScore,                # Specify data column
@@ -100,15 +148,20 @@ aggregate(x = df$sentimentScore,                # Specify data column
 #####################################
 #####################################
 
-# control= clm2.control(innerCtrl="noWarn")
-
 ord_m1 <- clmm2(
   emotionF ~ 1 + sexC*ethnicityC + (1 + sexC*ethnicityC|participantId), 
   data=df, 
   Hess = TRUE)
 
-ord_m2 <- clm(
+# to get random effects correctly
+ord_m2 <- clmm(
   emotionF ~ 1 + sexC*ethnicityC + (1 + sexC*ethnicityC|participantId), 
+  data=df, 
+  Hess = TRUE)
+
+# for nominal test 
+ord_m3 <- clm(
+  emotionF ~ sexC*ethnicityC + (sexC*ethnicityC|participantId), 
   data=df, 
   Hess = TRUE)
 
@@ -116,6 +169,7 @@ ord_m2 <- clm(
 # summary significant results
 summary(ord_m1)
 summary(ord_m2)
+summary(ord_m3)
 
 # sex beta= -0.11451, p-value = 0.001
 # indicates that [sex=male] pictures are less likely to be rated in more positive categories
@@ -136,13 +190,13 @@ exp(coef(ord_m1))
 
 ######
 ## sex
-logit = coef(ord_m1)[8]
+logit = coef(ord_m2)[8]
 
 exp(logit) # odds ratio 
 plogis(logit) # probbility
 
-# odds ratio of *emotion* being rated in category j or above at photo=male relative to photo=female is 0.8918002 
-# probability of *emotion* being rated in category j or above at photo=male relative to photo=female is 0.471403
+# odds ratio of *emotion* being rated in category j or above at photo=male relative to photo=female is 0.891 
+# probability of *emotion* being rated in category j or above at photo=male relative to photo=female is 0.47
 
 ############
 ## ethnicity
@@ -180,16 +234,105 @@ chisq.test(df$sexF, df$ethnicityF, correct=FALSE)
 ##########
 #  proportional odds assumption
 
-nominal_test(ord_m2)
+nominal_test(ord_m3)
 
 # Tests of nominal effects
 # 
-# formula: emotionF ~ 1 + sexC * ethnicityC + (1 + sexC * ethnicityC | participantId)
-#                                        Df logLik   AIC    LRT  Pr(>Chi)    
-# <none>                                   -19197 38414                     
-# sexC                                   6 -19187 38405 21.009  0.001828 ** 
-# ethnicityC                             6 -19165 38362 64.881 4.562e-12 ***
-# sexC:ethnicityC                        6 -19180 38391 34.993 4.323e-06 ***
+# formula: emotionF ~ sexC * ethnicityC + (sexC * ethnicityC | participantId)
+#                                    Df logLik   AIC    LRT  Pr(>Chi)    
+# <none>                               -19197 38414                     
+# sexC                               6 -19187 38405 21.009  0.001828 ** 
+# ethnicityC                         6 -19165 38362 64.881 4.562e-12 ***
+# sexC:ethnicityC                    6 -19180 38391 34.993 4.323e-06 ***
+#   ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 
 # assumptions are meet for sure
+
+
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+# Export to  dashboard
+
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+#####################################
+#####################################
+
+# get mathematical formula 
+
+
+library(equatiomatic)
+
+formula_lmer <- extract_eq(ord_m3)
+
+
+cat(formula_lmer, file = "lmer_output/formula_ord_lmer_summary_forced_mturk.txt")
+cat(formula_lmer, file = "../../emotions_dashboard/data/formula_ord_lmer_summary_forced_mturk.txt")
+
+
+#####################################
+#####################################
+
+# get model coefficients 
+
+library(sjPlot)
+
+
+tab_model(ord_m2, file = "lmer_output/ord_lmer_summary_forced_mturk.html")
+tab_model(ord_m2, file = "../../emotions_dashboard/data/ord_lmer_summary_forced_mturk.html")
+
+
+####################################
+####################################
+
+# get chi-square tables
+
+
+## sex x ethnicity
+
+
+sjt.xtab(df$sexF, 
+         df$ethnicityF, 
+         var.labels = c("Sex", "Ethnicity"), 
+         show.exp = TRUE,
+         emph.total = TRUE, 
+         file = "lmer_output/chi_sex_et_forced_mturk.html")
+
+
+sjt.xtab(df$sexF, 
+         df$ethnicityF, 
+         var.labels = c("Sex", "Ethnicity"), 
+         show.exp = TRUE,
+         emph.total = TRUE,
+         file = "../../emotions_dashboard/data/chi_sex_et_forced_mturk.html")
+
+
+####################################
+####################################
+
+# get nominal test table
+
+library(broom)
+library(htmlTable)
+
+nominal.test.table <- nominal_test(ord_m3) %>% 
+  tidy() %>% 
+  drop_na() %>% 
+  addHtmlTableStyle(align = "r") %>% 
+  txtRound(digits = 3) %>% 
+  htmlTable()
+
+nominal.test.table
+
+cat(nominal.test.table, file = "lmer_output/nominal_test_forced_mturk.html")
+cat(nominal.test.table, file = "../../emotions_dashboard/data/nominal_test_forced_mturk.html")
+
+
