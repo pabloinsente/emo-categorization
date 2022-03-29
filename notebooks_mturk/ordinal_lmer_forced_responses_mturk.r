@@ -8,6 +8,8 @@ table(df_mturk$emotion)
 
 # drop "Other" to break tie with "Neutral" and keep ordinal variable
 df <- subset(df_mturk, emotion!="Other")
+# drop because = to "I don't know what the person in the picture is feeling" Not "The person is feeling uncertainty"
+df <- subset(df, emotion!="Uncertain")
 
 table(df$emotion)
 
@@ -23,7 +25,7 @@ table(df$emotion)
 
 df$emotionF <- factor(df$emotion,
                       order = TRUE, 
-                      levels =c('Disgust', 'Anger', 'Fear', 'Sadness', 'Uncertain', 'Neutral', 'Surprise', 'Happiness'))
+                      levels =c('Disgust', 'Anger', 'Fear', 'Sadness', 'Neutral', 'Surprise', 'Happiness'))
 
 
 df$participantIdF <- as.factor(df$participantId)
@@ -171,7 +173,7 @@ summary(ord_m1)
 summary(ord_m2)
 summary(ord_m3)
 
-# sex beta= -0.11451, p-value = 0.001
+# sex beta= -0.12, p-value = 0.001
 # indicates that [sex=male] pictures are less likely to be rated in more positive categories
 
 ## NOT significant
@@ -190,12 +192,12 @@ exp(coef(ord_m1))
 
 ######
 ## sex
-logit = coef(ord_m2)[8]
+logit = coef(ord_m2)[7]
 
 exp(logit) # odds ratio 
 plogis(logit) # probbility
 
-# odds ratio of *emotion* being rated in category j or above at photo=male relative to photo=female is 0.891 
+# odds ratio of *emotion* being rated in category j or above at photo=male relative to photo=female is 0.89 
 # probability of *emotion* being rated in category j or above at photo=male relative to photo=female is 0.47
 
 ############
@@ -240,10 +242,10 @@ nominal_test(ord_m3)
 # 
 # formula: emotionF ~ sexC * ethnicityC + (sexC * ethnicityC | participantId)
 #                                    Df logLik   AIC    LRT  Pr(>Chi)    
-# <none>                               -19197 38414                     
-# sexC                               6 -19187 38405 21.009  0.001828 ** 
-# ethnicityC                         6 -19165 38362 64.881 4.562e-12 ***
-# sexC:ethnicityC                    6 -19180 38391 34.993 4.323e-06 ***
+# <none>                               -17010 34038                     
+# sexC                               5 -17000 34029 18.795  0.002099 ** 
+# ethnicityC                         5 -16978 33984 63.391 2.416e-12 ***
+# sexC:ethnicityC                    5 -16993 34014 33.146 3.521e-06 ***
 #   ---
 # Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 

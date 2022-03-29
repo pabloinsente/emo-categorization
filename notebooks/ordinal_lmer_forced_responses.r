@@ -8,6 +8,8 @@ table(df_students$emotion)
 
 # drop "Other" to break tie with "Neutral" and keep ordinal variable
 df <- subset(df_students, emotion!="Other")
+# drop because = to "I don't know what the person in the picture is feeling" Not "The person is feeling uncertainty"
+df <- subset(df, emotion!="Uncertain")
 
 table(df$emotion)
 
@@ -23,7 +25,7 @@ table(df$emotion)
 
 df$emotionF <- factor(df$emotion,
                       order = TRUE, 
-                      levels =c('Disgust', 'Anger', 'Fear', 'Sadness', 'Uncertain', 'Neutral', 'Surprise', 'Happiness'))
+                      levels =c('Disgust', 'Anger', 'Fear', 'Sadness', 'Neutral', 'Surprise', 'Happiness'))
 
 
 df$participantIdF <- as.factor(df$participantId)
@@ -174,13 +176,13 @@ summary(ord_m2)
 summary(ord_m3)
 
 
-# sex beta= -0.078, p-value = 0.03
+# sex beta= -0.08, p-value = 0.03
 # indicates that [sex=male] pictures are less likely to be rated in more positive categories
 
-# ethnicity beta = 0.11237, p-value = 0.002
+# ethnicity beta = 0.10, p-value = 0.007
 # indicates that [ethnicity=white] pictures are more likely to be rated in more positive categories
 
-# sexC:ethnicityC beta = 0.15435, p-value = 0.03
+# sexC:ethnicityC beta = 0.14, p-value = 0.057
 # indicates the effect of ethnicity differs within each sex category (or visceversa)
 
 #######
@@ -193,24 +195,24 @@ exp(coef(ord_m1))
 
 ######
 ## sex
-logit = coef(ord_m2)[8]
+logit = coef(ord_m2)[7]
 
 exp(logit) # odds ratio 
 plogis(logit) # probbility
 
-# odds ratio of *emotion* being rated in category j or above at photo=male relative to photo=female is 0.9248824  
-# probability of *emotion* being rated in category j or above at photo=male relative to photo=female is 0.4804877 
+# odds ratio of *emotion* being rated in category j or above at photo=male relative to photo=female is 0.92
+# probability of *emotion* being rated in category j or above at photo=male relative to photo=female is 0.47 
 
 ############
 ## ethnicity
 
-logit = coef(ord_m2)[9]
+logit = coef(ord_m2)[8]
 
 exp(logit) # odds ratio 
 plogis(logit) # probability
 
-# odds ratio of *emotion* being rated in category j or above at ethnicity=white relative to ethnicity=poc is 1.118932 
-# probability of *emotion* being rated in category j or above at ethnicity=white relative to ethnicity=poc is 0.5280642 
+# odds ratio of *emotion* being rated in category j or above at ethnicity=white relative to ethnicity=poc is 1.1
+# probability of *emotion* being rated in category j or above at ethnicity=white relative to ethnicity=poc is 0.53 
 
 
 ###########
@@ -218,13 +220,13 @@ plogis(logit) # probability
 # whether the effect of "sex" for the [photo=white] is reliably different from the same effect for [photo=poc]
 
 
-logit = coef(ord_m2)[10]
+logit = coef(ord_m2)[9]
 
 exp(logit) # odds ratio 
 plogis(logit) # probability
 
-# odds ratio of *emotion* being rated in category j or above at [] relative to [] is 1.166895 
-# probability of *emotion* being rated in category j or above at [] relative to [] is 0.5385102  
+# odds ratio of *emotion* being rated in category j or above at [] relative to [] is 1.15
+# probability of *emotion* being rated in category j or above at [] relative to [] is 0.54 
 
 
 ###############################
@@ -243,18 +245,19 @@ chisq.test(df$sexF, df$ethnicityF, correct=FALSE)
 ##########
 #  proportional odds assumption
 
-# nominal_test(ord_m3)
-# 
+nominal_test(ord_m3)
+
+ 
 # Tests of nominal effects
 # 
 # formula: emotionF ~ sexC * ethnicityC + (sexC * ethnicityC | participantId)
 #                                    Df logLik   AIC    LRT  Pr(>Chi)    
-# <none>                               -18462 36943                     
-# sexC                               6 -18458 36947  7.838    0.2502    
-# ethnicityC                         6 -18413 36857 98.081 < 2.2e-16 ***
-# sexC:ethnicityC                    6 -18428 36888 67.235 1.507e-12 ***
+# <none>                               -16127 32273                     
+# sexC                               5 -16124 32275  7.625    0.1781    
+# ethnicityC                         5 -16078 32184 98.968 < 2.2e-16 ***
+# sexC:ethnicityC                    5 -16096 32219 63.560 2.228e-12 ***
 #   ---
-#   Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 # scale_test(ord_m2)
 

@@ -158,7 +158,7 @@ table(df$conditionC)
 ## without derivatives check
 control=lmerControl(optimizer ="Nelder_Mead", calc.derivs=FALSE,optCtrl=list(maxfun=2e6), check.nobs.vs.nRE = "ignore")
 m2<-lmer(
-    sentimentScore ~ 1 + sexC*ethnicityC*conditionC + (1 + sexC*ethnicityC*conditionC|participantId), 
+    sentimentScore ~ 1 + sexC*ethnicityC*conditionC + (1 + sexC*ethnicityC|participantId), 
     data = df,
     control=control)
 
@@ -177,63 +177,102 @@ summary(m2)
 # summary(m3)
 
 ### model comparison ####
+control=lmerControl(optimizer ="Nelder_Mead", calc.derivs=FALSE,optCtrl=list(maxfun=2e6), check.nobs.vs.nRE = "ignore")
 
+
+### condition only
+m2.condition <-lmer(
+  sentimentScore ~ 1 + conditionC +  (1|participantId), 
+  data = df,
+  control=control)
+
+summary(m2.condition)
+anova(m2, m2.condition)
+# m2 is better
+
+
+### sex only
 m2.sex <-lmer(
-  sentimentScore ~ 1 + sexC +  (1+ sexC*ethnicityC|participantId), 
+  sentimentScore ~ 1 + sexC +  (1+ sexC|participantId), 
   data = df,
   control=control)
 
 summary(m2.sex)
 anova(m2, m2.sex)
+# m2 is better 
 
-# m2 is better
-
+### ethnicity only
 m2.ethnicityC <-lmer(
-  sentimentScore ~ 1 + ethnicityC + (1+ sexC*ethnicityC |participantId), 
+  sentimentScore ~ 1 + ethnicityC + (1+ ethnicityC |participantId), 
   data = df,
   control=control)
 
 summary(m2.ethnicityC)
 anova(m2, m2.ethnicityC)
-
 # m2 is better
 
+
+### sex + condition
+m2.condition.sex <-lmer(
+  sentimentScore ~ 1 + sexC*conditionC +  (1 + sexC|participantId), 
+  data = df,
+  control=control)
+
+summary(m2.condition.sex)
+anova(m2, m2.condition.sex)
+# m2 is better
+
+
+### ethnicity + condition
+m2.condition.ethnicity <-lmer(
+  sentimentScore ~ 1 + ethnicityC*conditionC +  (1 + ethnicityC|participantId), 
+  data = df,
+  control=control)
+
+summary(m2.condition.ethnicity)
+anova(m2, m2.condition.ethnicity)
+# m2 is better
+
+
+### addtive model
 m2.add <-lmer(
-  sentimentScore ~ 1 + sexC+ethnicityC + (1+sexC*ethnicityC |participantId), 
+  sentimentScore ~ 1 + sexC+ethnicityC+conditionC + (1+sexC+ethnicityC |participantId), 
   data = df,
   control=control)
 
 summary(m2.add)
 anova(m2, m2.add)
-
 # m2 is better
 
-full.interactive.model <- m2
+condition.only.model <- m2.condition
 sex.only.model <- m2.sex
 ethnicity.only.model <- m2.ethnicityC
-sex.ethnicity.additive.model <- m2.add
+condition.sex.model <- m2.condition.sex
+condition.ethnicity.model <- m2.condition.ethnicity
+sex.ethnicity.condition.additive.model <- m2.add
+full.interactive.model <- m2
 
-anova(sex.only.model, ethnicity.only.model, sex.ethnicity.additive.model, full.interactive.model)
+anova(condition.only.model, sex.only.model, ethnicity.only.model, condition.sex.model, condition.ethnicity.model, sex.ethnicity.condition.additive.model, full.interactive.model)
 
-(aov.comparison <- anova(sex.only.model, ethnicity.only.model, sex.ethnicity.additive.model, full.interactive.model))
+(aov.comparison <- anova(condition.only.model, sex.only.model, ethnicity.only.model, condition.sex.model, condition.ethnicity.model, sex.ethnicity.condition.additive.model, full.interactive.model))
 
 aov.apa.com <- kable(aov.comparison, digits = 3, format = "html", caption = "ANOVA table for model comparison")
-cat(aov.apa.com, file = "lmer_output/anova_comparison_lmer_summary_free_mturk.html")
-cat(aov.apa.com, file = "../../emotions_dashboard/data/anova_comparison_lmer_summary_free_mturk.html")
+cat(aov.apa.com, file = "lmer_output/anova_comparison_lmer_summary_free_mturk_espanol.html")
+cat(aov.apa.com, file = "../../emotions_dashboard/data/anova_comparison_lmer_summary_free_mturk_espanol.html")
 
 
 ### get mathematical formula
 formula_lmer <- extract_eq(m2)
 
-cat(formula_lmer, file = "lmer_output/formula_lmer_summary_free_mturk.txt")
-cat(formula_lmer, file = "../../emotions_dashboard/data/formula_lmer_summary_free_mturk.txt")
+cat(formula_lmer, file = "lmer_output/formula_lmer_summary_free_mturk_espanol.txt")
+cat(formula_lmer, file = "../../emotions_dashboard/data/formula_lmer_summary_free_mturk_espanol.txt")
 
 #extract_eq(m2, use_coefs = TRUE)
 
 
 ### get coefficient table for reporting
-tab_model(m2, file = "lmer_output/lmer_summary_free_mturk.html")
-tab_model(m2, file = "../../emotions_dashboard/data/lmer_summary_free_mturk.html")
+tab_model(m2, file = "lmer_output/lmer_summary_free_mturk_espanol.html")
+tab_model(m2, file = "../../emotions_dashboard/data/lmer_summary_free_mturk_espanol.html")
 
 
 ## Type III anova table with p-values for F-tests based on Satterthwaite's method
@@ -241,8 +280,8 @@ tab_model(m2, file = "../../emotions_dashboard/data/lmer_summary_free_mturk.html
 (aov <- anova(m2))
 
 aov.apa <- kable(aov, digits = 3, format = "html", caption = "ANOVA table for LMER coefficients")
-cat(aov.apa, file = "lmer_output/anova_lmer_summary_free_mturk.html")
-cat(aov.apa, file = "../../emotions_dashboard/data/anova_lmer_summary_free_mturk.html")
+cat(aov.apa, file = "lmer_output/anova_lmer_summary_free_mturk_espanol.html")
+cat(aov.apa, file = "../../emotions_dashboard/data/anova_lmer_summary_free_mturk_espanol.html")
 
 
 #####################################
@@ -281,9 +320,13 @@ cat(aov.apa, file = "../../emotions_dashboard/data/anova_lmer_summary_free_mturk
 #####################################
 #####################################
 
+
+##### english
+df_en <- subset(df, condition=="english")
+
 s <- svgstring()
 
-p = ggplot(df,aes(sex,sentimentScore,color=ethnicity,group=ethnicity))+
+p = ggplot(df_en,aes(sex,sentimentScore,color=ethnicity,group=ethnicity))+
     geom_point()+
     geom_smooth(method="lm",se=F)+
     facet_wrap(~participantId)+
@@ -293,11 +336,37 @@ p = ggplot(df,aes(sex,sentimentScore,color=ethnicity,group=ethnicity))+
 p
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/participants_charts_lmer_free_mturk.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/participants_charts_lmer_free_mturk.txt")
+
+cat(svg.string.plot, file = "lmer_output/participants_charts_lmer_free_mturk_espanol_en.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/participants_charts_lmer_free_mturk_espanol_en.txt")
 
 dev.off()
 
+p
+
+##### espanol
+df_es <- subset(df, condition=="espanol")
+
+
+s <- svgstring()
+
+p = ggplot(df_es,aes(sex,sentimentScore,color=ethnicity,group=ethnicity))+
+  geom_point()+
+  geom_smooth(method="lm",se=F)+
+  facet_wrap(~participantId)+
+  theme_bw()+
+  scale_color_manual(values=c("#1f77b4", "#ff7f0e"))
+
+p
+svg.string.plot <- s()
+
+cat(svg.string.plot, file = "lmer_output/participants_charts_lmer_free_mturk_espanol_es.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/participants_charts_lmer_free_mturk_espanol_es.txt")
+
+dev.off()
+
+
+p
 
 #####################################
 #####################################
@@ -322,8 +391,8 @@ format(4.440288e-07, scientific = F)
 # save to html table
 aov.btw.res <- kable(anova(Levene.Model.F), digits = 3, format = "html", caption = "ANOVA table for between subjects residuals")
 
-cat(aov.btw.res, file = "lmer_output/anova_bwt_res_summary_free_mturk.html")
-cat(aov.btw.res, file = "../../emotions_dashboard/data/anova_bwt_res_summary_free_mturk.html")
+cat(aov.btw.res, file = "lmer_output/anova_bwt_res_summary_free_mturk_espanol.html")
+cat(aov.btw.res, file = "../../emotions_dashboard/data/anova_bwt_res_summary_free_mturk_espanol.html")
 
 
 # Since the p value < 0.05, we can say that the variance of the residuals is equal and 
@@ -335,10 +404,11 @@ s <- svgstring(width = 7,
 Plot.Model.F <- plot(m2) #creates a fitted vs residual plot
 Plot.Model.F
 Plot.Model.F <- s()
-cat(Plot.Model.F , file = "lmer_output/fitted_vs_residual_plot_free_mturk.txt")
-cat(Plot.Model.F , file = "../../emotions_dashboard/data/fitted_vs_residual_plot_free_mturk.txt")
+cat(Plot.Model.F , file = "lmer_output/fitted_vs_residual_plot_free_mturk_espanol.txt")
+cat(Plot.Model.F , file = "../../emotions_dashboard/data/fitted_vs_residual_plot_free_mturk_espanol.txt")
 dev.off()
 
+plot(m2)
 ## This looks very unsystematic
 
 resid1 <- hlm_resid(m2, level = 1, standardize = TRUE)
@@ -353,8 +423,8 @@ ggplot(data = resid1, aes(x = participantId, y = .std.ls.resid)) +
        title = "Least-Squares residuals by participant ID")
 
 l1.res <- s()
-cat(l1.res , file = "lmer_output/l1_res_plot_free_mturk.txt")
-cat(l1.res , file = "../../emotions_dashboard/data/l1_res_plot_free_mturk.txt")
+cat(l1.res , file = "lmer_output/l1_res_plot_free_mturk_espanol.txt")
+cat(l1.res , file = "../../emotions_dashboard/data/l1_res_plot_free_mturk_espanol.txt")
 dev.off()
 
 ## There are quite a couple of large residuals 
@@ -371,8 +441,8 @@ ggplot(data = resid2, aes(x = participantId, y = .std.ranef.intercept)) +
        title = "Intercept random effects against participant ID")
 
 l2.res.int <- s()
-cat(l2.res.int , file = "lmer_output/l2_int_res_plot_free_mturk.txt")
-cat(l2.res.int , file = "../../emotions_dashboard/data/l2_int_res_plot_free_mturk.txt")
+cat(l2.res.int , file = "lmer_output/l2_int_res_plot_free_mturk_espanol.txt")
+cat(l2.res.int , file = "../../emotions_dashboard/data/l2_int_res_plot_free_mturk_espanol.txt")
 dev.off()
 
 #####################################
@@ -388,11 +458,11 @@ s <- svgstring(width = 7,
                height = 5)
 qqmath(m2, id=0.05) #id: identifies values that may be exerting undue influence on the model (i.e. outliers)
 svg.qqplot <- s()
-cat(svg.qqplot, file = "lmer_output/qqplot_lmer_free_mturk.txt")
-cat(svg.qqplot, file = "../../emotions_dashboard/data/qqplot_lmer_free_mturk.txt")
+cat(svg.qqplot, file = "lmer_output/qqplot_lmer_free_mturk_espanol.txt")
+cat(svg.qqplot, file = "../../emotions_dashboard/data/qqplot_lmer_free_mturk_espanol.txt")
 dev.off()
 
-
+qqmath(m2, id=0.05)
 #####################################
 #####################################
 
@@ -408,8 +478,10 @@ dev.off()
 
 #############################
 
+
 infl <- hlm_influence(m2, level = 1)
 
+infl
 # IQR = as.numeric(format(IQR(infl$cooksd)*3, scientific = F))
 CutOff = 4/nrow(infl)
 print(CutOff)
@@ -420,8 +492,8 @@ s <- svgstring(width = 7,
 # dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = "internal")
 dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = CutOff)
 svg.string.plot <- s()
-cat(svg.string.plot, file = "lmer_output/influence_datapoints_lmer_free_mturk.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_datapoints_lmer_free_mturk.txt")
+cat(svg.string.plot, file = "lmer_output/influence_datapoints_lmer_free_mturk_espanol.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_datapoints_lmer_free_mturk_espanol.txt")
 dev.off()
 
 

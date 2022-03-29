@@ -40,6 +40,7 @@ df <- rbind(df_mturk_en, df_mturk_esp)
 
 # drop "Other" to break tie with "Neutral" and keep ordinal variable
 df <- subset(df, emotion!="Other")
+df <- subset(df, emotion!="Uncertain")
 
 
 table(df$emotion)
@@ -57,7 +58,7 @@ table(df$conditionC)
 
 df$emotionF <- factor(df$emotion,
                       order = TRUE, 
-                      levels =c('Disgust', 'Anger', 'Fear', 'Sadness', 'Uncertain', 'Neutral', 'Surprise', 'Happiness'))
+                      levels =c('Disgust', 'Anger', 'Fear', 'Sadness', 'Neutral', 'Surprise', 'Happiness'))
 
 
 df$participantIdF <- as.factor(df$participantId)
@@ -363,11 +364,11 @@ summary(ord_m2)
 summary(ord_m3)
 
 
-# ConditionC beta = 0.082, p-value = 0.03
+# ConditionC beta = 0.07927, p-value = 0.04
 # indicates spanish-speaking participants rate pictures more positively; more likely to rate in more positive categories
 
-# sexC:conditionC beta= 0.159, p-value = 0.006
-# indicates that male pictures are more likely to be rated in more positive catgories
+# sexC:conditionC beta= 0.16502, p-value = 0.006
+# indicates that male pictures are more likely to be rated in more positive categories
 
 #######
 # Get odds ratio for coefficients
@@ -390,24 +391,24 @@ exp(coef(ord_m2))
 ############
 ## ethnicity** NOT significant
 
-logit = coef(ord_m2)[10]
+# logit = coef(ord_m2)[11]
+# 
+# exp(logit) # odds ratio 
+# plogis(logit) # probability
 
-exp(logit) # odds ratio 
-plogis(logit) # probability
-
-# odds ratio of *emotion* being rated in category j or above at photo=white relative to photo=poc is 1.086
-# probability of *emotion* being rated in category j or above at ethnicity=white relative to ethnicity=POC is 0.52
+# odds ratio of *emotion* being rated in category j or above at photo=white relative to photo=poc is 1.1
+# probability of *emotion* being rated in category j or above at ethnicity=white relative to ethnicity=POC is 0.524
 
 ###########
 # condition
 
-logit = coef(ord_m2)[11]
+logit = coef(ord_m2)[9]
 
 exp(logit) # odds ratio 
 plogis(logit)
 
-# odds ratio of *emotion* being rated in category j or above at condition=espanol relative to photo=english is 1.09
-# probability of *emotion* being rated in category j or above at condition=espanol relative to photo=english is 0.52
+# odds ratio of *emotion* being rated in category j or above at condition=espanol relative to photo=english is 1.082502 
+# probability of *emotion* being rated in category j or above at condition=espanol relative to photo=english is 0.5198083 
 
 
 ###########
@@ -415,7 +416,7 @@ plogis(logit)
 # whether the effect of "sex" for the Spanish-survey is reliably different from the same effect for the English-survey
 
 
-logit = coef(ord_m2)[12]
+logit = coef(ord_m2)[11]
 
 exp(logit) # odds ratio 
 plogis(logit)
@@ -449,16 +450,18 @@ nominal_test(ord_m3)
 
 # Tests of nominal effects
 # 
-# formula: emotionF ~ 1 + sexC * ethnicityC * conditionC + (1 + sexC * ethnicityC | participantId)
-#                                       Df logLik   AIC     LRT  Pr(>Chi)    
-# <none>                                   -30907 61842                      
-# sexC                                   6 -30887 61813  40.272 4.028e-07 ***
-# ethnicityC                             6 -30849 61739 115.130 < 2.2e-16 ***
-# conditionC                             6 -30830 61700 153.763 < 2.2e-16 ***
-# sexC:ethnicityC                        6 -30876 61793  60.841 3.037e-11 ***
-# sexC:conditionC                        6 -30904 61848   5.596    0.4699    
-# ethnicityC:conditionC                  6 -30905 61849   4.649    0.5896    
-# sexC:ethnicityC:conditionC             6 -30904 61848   5.306    0.5052  
+# formula: emotionF ~ sexC * ethnicityC * conditionC + (sexC * ethnicityC | participantId)
+#                                    Df logLik   AIC     LRT  Pr(>Chi)    
+# <none>                               -27137 54299                      
+# sexC                               5 -27121 54278  30.923 9.700e-06 ***
+# ethnicityC                         5 -27081 54199 110.402 < 2.2e-16 ***
+# conditionC                         5 -27066 54168 140.691 < 2.2e-16 ***
+# sexC:ethnicityC                    5 -27109 54254  55.525 1.018e-10 ***
+# sexC:conditionC                    5 -27134 54304   5.239    0.3874    
+# ethnicityC:conditionC              5 -27135 54305   4.097    0.5356    
+# sexC:ethnicityC:conditionC         5 -27134 54304   5.396    0.3695    
+# ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
 
 # scale_test(ord_m2)
 
