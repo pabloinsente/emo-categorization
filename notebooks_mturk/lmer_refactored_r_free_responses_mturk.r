@@ -421,7 +421,7 @@ high_cooksd_participants = infl.classes[infl.classes$cooksd > CutOffGroup, ] %>%
 
 high_cooksd_participants
 
-# participant 43
+# none
 
 #####################################
 #####################################
@@ -494,116 +494,155 @@ high_leverage_participants
 
 ## No high leverage participants
 
-#add index column to data frame
-df$id <- 1:nrow(df)
 
-high_cooksd$id
+################################################################################
+################################################################################
 
+##### There isn't enough high influence or leverage to justify rerunning models
 
-nrow(df)
-
-`%ni%` <- Negate(`%in%`)
-df.filtered <- filter(df, id %ni% high_cooksd$id)
-
-nrow(df.filtered)
+################################################################################
+################################################################################
 
 
 #####################################
 #####################################
 
-# Refitted LMER 
-# - Excluding outliers; high influence; high leverage observations and participants 
-# - Heavylmer: Lmer for heavy-tailed residuals
+# significant effects charts
 
 #####################################
 #####################################
 
-### traditional lmer approach ####
+####################
+### Helper functions
+
+normDataWithin <- function(data=NULL, idvar, measurevar, betweenvars=NULL,
+                           na.rm=FALSE, .drop=TRUE) {
+  library(plyr)
+  
+  # Measure var on left, idvar + between vars on right of formula.
+  data.subjMean <- ddply(data, c(idvar, betweenvars), .drop=.drop,
+                         .fun = function(xx, col, na.rm) {
+                           c(subjMean = mean(xx[,col], na.rm=na.rm))
+                         },
+                         measurevar,
+                         na.rm
+  )
+  
+  # Put the subject means with original data
+  data <- merge(data, data.subjMean)
+  
+  # Get the normalized data in a new column
+  measureNormedVar <- paste(measurevar, "_norm", sep="")
+  data[,measureNormedVar] <- data[,measurevar] - data[,"subjMean"] +
+    mean(data[,measurevar], na.rm=na.rm)
+  
+  # Remove this subject mean column
+  data$subjMean <- NULL
+  
+  return(data)
+}
+
+summarySEwithin <- function(data=NULL, measurevar, betweenvars=NULL, withinvars=NULL,
+                            idvar=NULL, na.rm=FALSE, conf.interval=.95, .drop=TRUE) {
+  
+  # Ensure that the betweenvars and withinvars are factors
+  factorvars <- vapply(data[, c(betweenvars, withinvars), drop=FALSE],
+                       FUN=is.factor, FUN.VALUE=logical(1))
+  
+  if (!all(factorvars)) {
+    nonfactorvars <- names(factorvars)[!factorvars]
+    message("Automatically converting the following non-factors to factors: ",
+            paste(nonfactorvars, collapse = ", "))
+    data[nonfactorvars] <- lapply(data[nonfactorvars], factor)
+  }
+  
+  # Get the means from the un-normed data
+  datac <- summarySE(data, measurevar, groupvars=c(betweenvars, withinvars),
+                     na.rm=na.rm, conf.interval=conf.interval, .drop=.drop)
+  
+  # Drop all the unused columns (these will be calculated with normed data)
+  datac$sd <- NULL
+  datac$se <- NULL
+  datac$ci <- NULL
+  
+  # Norm each subject's data
+  ndata <- normDataWithin(data, idvar, measurevar, betweenvars, na.rm, .drop=.drop)
+  
+  # This is the name of the new column
+  measurevar_n <- paste(measurevar, "_norm", sep="")
+  
+  # Collapse the normed data - now we can treat between and within vars the same
+  ndatac <- summarySE(ndata, measurevar_n, groupvars=c(betweenvars, withinvars),
+                      na.rm=na.rm, conf.interval=conf.interval, .drop=.drop)
+  
+  # Apply correction from Morey (2008) to the standard error and confidence interval
+  #  Get the product of the number of conditions of within-S variables
+  nWithinGroups    <- prod(vapply(ndatac[,withinvars, drop=FALSE], FUN=nlevels,
+                                  FUN.VALUE=numeric(1)))
+  correctionFactor <- sqrt( nWithinGroups / (nWithinGroups-1) )
+  
+  # Apply the correction factor
+  ndatac$sd <- ndatac$sd * correctionFactor
+  ndatac$se <- ndatac$se * correctionFactor
+  ndatac$ci <- ndatac$ci * correctionFactor
+  
+  # Combine the un-normed means with the normed results
+  merge(datac, ndatac)
+}
 
 
-## without derivatives check
-control <- lmerControl(optimizer ="Nelder_Mead", calc.derivs=FALSE, optCtrl=list(maxfun=2e6), check.nobs.vs.nRE = "ignore")
-
-m3 <-lmer(
-    sentimentScore ~ 1 + sexC*ethnicityC + (1 + sexC*ethnicityC|participantId), 
-    data = df.filtered,
-    control=control)
-
-summary(m3)
+############################
+#### tables for plotting ###
 
 
-### get coefficient table for reporting
-tab_model(m3, file = "lmer_output/lmer_refit_summary_free_mturk.html")
-tab_model(m3, file = "../../emotions_dashboard/data/lmer_refit_summary_free_mturk.html")
+sex.sum.table <- summarySEwithin(df.filtered, measurevar="sentimentScore", withinvars=c("sex"), idvar="participantId")
+sex.sum.table
 
-## Type III anova table with p-values for F-tests based on Satterthwaite's
-## method:
-(aov.m3 <- anova(m3))
+sex.ethnicity.sum.table <- summarySEwithin(df.filtered, measurevar="sentimentScore", withinvars=c("sex","ethnicity"), idvar="participantId")
+sex.ethnicity.sum.table
 
-aov.apa.m3 <- kable(aov.m3, digits = 3, format = "html", caption = "ANOVA table for refitted LMER coefficients")
-cat(aov.apa.m3, file = "lmer_output/anova_lmer_refit_summary_free_mturk.html")
-cat(aov.apa.m3, file = "../../emotions_dashboard/data/anova_lmer_refit_summary_free_mturk.html")
+######################
+### Effect of sex ####
+
+# Mean + Standard error of the mean
+ggplot(sex.sum.table, aes(y=sentimentScore, x=sex, colour=sex)) + 
+  geom_errorbar(aes(ymin=sentimentScore-se, ymax=sentimentScore+se), width=.1) +
+  geom_point() + 
+  labs (title= "Mean and SEM sentiment score by sex")
+
+s <- svgstring(width = 7,
+               height = 5)
+
+ggplot(sex.sum.table, aes(y=sentimentScore, x=sex, colour=sex)) + 
+  geom_errorbar(aes(ymin=sentimentScore-se, ymax=sentimentScore+se), width=.1) +
+  geom_point() + 
+  labs (title= "Mean and SEM sentiment score by sex")
+
+chart <- s()
+cat(chart , file = "lmer_output/sex_effect_free_mturk.txt")
+cat(chart , file = "../../emotions_dashboard/data/sex_effect_free_mturk.txt")
+dev.off()
 
 
-###################################
-###################################
+###############################
+### Sex * Ethnicity effect ####
 
-# ANOVA 2x2 approach 
+# Mean + std error of the mean 
+ggplot(sex.ethnicity.sum.table, aes(x=ethnicity, y=sentimentScore, fill=sex, color=sex)) +
+  geom_errorbar(aes(ymin=sentimentScore-se, ymax=sentimentScore+se), width=.1) +
+  geom_point() + 
+  labs (title= "Mean and SEM sentiment score by sex and ethnicity ")
 
-###################################
-###################################
 
-# 
-# library(rstatix)
-# library(ggpubr)
-# library(ez) 
-# 
-# df %>%
-#   group_by(sex, ethnicity) %>%
-#   get_summary_stats(sentimentScore, type = "mean_sd")
-# 
-# bxp.sex <- ggboxplot(
-#     df, 
-#     x = "sex",
-#     y = "sentimentScore",
-#     palette = "jco"
-#   )
-# bxp.sex
-# 
-# bxp.ethnicity <- ggboxplot(
-#     df, 
-#     x = "ethnicity",
-#     y = "sentimentScore",
-#     palette = "jco"
-#   )
-# bxp.ethnicity
-# 
-# bxp <- ggboxplot(
-#     df,
-#     x = "sex",
-#     y = "sentimentScore",
-#     color = "ethnicity",
-#     palette = "jco"
-#   )
-# bxp
-# 
-# df %>%
-#   group_by(ethnicity, sex) %>%
-#   identify_outliers(sentimentScore)
-# 
-# # no outliers
-# 
-# df %>%
-#   group_by(ethnicity, sex) %>%
-#   shapiro_test(sentimentScore)
-# 
-# # not normal
-# 
-# ggqqplot(df, "sentimentScore", ggtheme = theme_bw()) +
-#   facet_grid(sex ~ ethnicity, labeller = "label_both")
-# 
-# res.aov  = ezANOVA(data=df,
-#                    wid=.(participantId), 
-#                    dv=.(sentimentScore), 
-#                    within=.(sex, ethnicity))
-# res.aov  
+s <- svgstring(width = 7,
+               height = 5)
+
+ggplot(sex.ethnicity.sum.table, aes(x=ethnicity, y=sentimentScore, fill=sex, color=sex)) +
+  geom_errorbar(aes(ymin=sentimentScore-se, ymax=sentimentScore+se), width=.1) +
+  geom_point() + 
+  labs (title= "Mean and SEM sentiment score by sex and ethnicity ")
+
+chart <- s()
+cat(chart , file = "lmer_output/sex_et_effect_free_mturk.txt")
+cat(chart , file = "../../emotions_dashboard/data/sex_et_effect_free_mturk.txt")
+dev.off()

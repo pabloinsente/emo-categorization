@@ -106,7 +106,6 @@ df = rbind(df_mturk_en, df_mturk_esp)
 table(df$conditionC)
 
 
-
 #####################################
 #####################################
 
@@ -478,6 +477,7 @@ qqmath(m2, id=0.05)
 
 #############################
 
+invisible(utils::memory.limit(64000))
 
 infl <- hlm_influence(m2, level = 1)
 
@@ -504,7 +504,9 @@ head(high_cooksd, n=10)
 
 high_cooksd$id
 
-#### id: 13412
+#### id: 16205 16115 16069 16155 16166 16067 16105 20362 
+### 20688 20557 18744 16183 16179 16184 16177 16070 16173 
+### 16208 16159 16201 16073 16060 22838 20821 20845 20753 20734 20894
 
 #############################
 
@@ -525,8 +527,8 @@ s <- svgstring(width = 7,
 dotplot_diag(infl.classes$cooksd, name = "cooks.distance", cutoff = CutOffGroup, modify = "dotplot")
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/influence_participants_lmer_free_mturk.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_participants_lmer_free_mturk.txt")
+cat(svg.string.plot, file = "lmer_output/influence_participants_lmer_free_mturk_espanol.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_participants_lmer_free_mturk_espanol.txt")
 dev.off()
 
 
@@ -535,7 +537,7 @@ high_cooksd_participants = infl.classes[infl.classes$cooksd > CutOffGroup, ] %>%
 
 high_cooksd_participants
 
-# participant 43
+# participant 24, 9, 20
 
 #####################################
 #####################################
@@ -562,8 +564,8 @@ s <- svgstring(width = 7,
 dotplot_diag(infl$leverage.overall, name = "leverage", cutoff = CutOffLeverage)
 
 svg.string.plot <- s()
-cat(svg.string.plot, file = "lmer_output/leverage_datapoints_lmer_free_mturk.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/leverage_datapoints_lmer_free_mturk.txt")
+cat(svg.string.plot, file = "lmer_output/leverage_datapoints_lmer_free_mturk_espanol.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/leverage_datapoints_lmer_free_mturk_espanol.txt")
 dev.off()
 
 high_leverage = infl[infl$leverage.overall > CutOffLeverage, ] %>%
@@ -595,8 +597,8 @@ s <- svgstring(width = 7,
 dotplot_diag(infl.classes$leverage.overall, name = "leverage", cutoff = CutOffLeverageParticipants)
 
 svg.string.plot <- s()
-cat(svg.string.plot, file = "lmer_output/leverage_participants_lmer_free_mturk.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/leverage_participants_lmer_free_mturk.txt")
+cat(svg.string.plot, file = "lmer_output/leverage_participants_lmer_free_mturk_espanol.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/leverage_participants_lmer_free_mturk_espanol.txt")
 dev.off()
 
 
@@ -608,18 +610,37 @@ high_leverage_participants
 
 ## No high leverage participants
 
+###########################
+###########################
+
+# remove high influence datapoints and participants
+
+###########################
+###########################
+
 #add index column to data frame
 df$id <- 1:nrow(df)
 
 high_cooksd$id
 
+high_cooksd_participants$participantId
+
 
 nrow(df)
 
+# remove datapoints
 `%ni%` <- Negate(`%in%`)
 df.filtered <- filter(df, id %ni% high_cooksd$id)
 
-nrow(df.filtered)
+nrow(df) - nrow(df.filtered)
+
+# remove participants
+table(df$participantId)
+df.filtered <- filter(df.filtered, participantId %ni% high_cooksd_participants$participantId)
+table(df.filtered$participantId)
+
+
+dim(table(df$participantId)) - dim(table(df.filtered$participantId))
 
 
 #####################################
@@ -639,7 +660,7 @@ nrow(df.filtered)
 control <- lmerControl(optimizer ="Nelder_Mead", calc.derivs=FALSE, optCtrl=list(maxfun=2e6), check.nobs.vs.nRE = "ignore")
 
 m3 <-lmer(
-    sentimentScore ~ 1 + sexC*ethnicityC + (1 + sexC*ethnicityC|participantId), 
+    sentimentScore ~ 1 + sexC*ethnicityC*conditionC + (1 + sexC*ethnicityC|participantId), 
     data = df.filtered,
     control=control)
 
@@ -647,77 +668,244 @@ summary(m3)
 
 
 ### get coefficient table for reporting
-tab_model(m3, file = "lmer_output/lmer_refit_summary_free_mturk.html")
-tab_model(m3, file = "../../emotions_dashboard/data/lmer_refit_summary_free_mturk.html")
+tab_model(m3, file = "lmer_output/lmer_refit_summary_free_mturk_espanol.html")
+tab_model(m3, file = "../../emotions_dashboard/data/lmer_refit_summary_free_mturk_espanol.html")
 
 ## Type III anova table with p-values for F-tests based on Satterthwaite's
 ## method:
 (aov.m3 <- anova(m3))
 
 aov.apa.m3 <- kable(aov.m3, digits = 3, format = "html", caption = "ANOVA table for refitted LMER coefficients")
-cat(aov.apa.m3, file = "lmer_output/anova_lmer_refit_summary_free_mturk.html")
-cat(aov.apa.m3, file = "../../emotions_dashboard/data/anova_lmer_refit_summary_free_mturk.html")
+cat(aov.apa.m3, file = "lmer_output/anova_lmer_refit_summary_free_mturk_espanol.html")
+cat(aov.apa.m3, file = "../../emotions_dashboard/data/anova_lmer_refit_summary_free_mturk_espanol.html")
 
 
-###################################
-###################################
 
-# ANOVA 2x2 approach 
+#####################################
+#####################################
 
-###################################
-###################################
+# significant effects charts
+
+#####################################
+#####################################
+
+####################
+### Helper functions
+
+summarySE <- function(data=NULL, measurevar, groupvars=NULL, na.rm=FALSE,
+                      conf.interval=.95, .drop=TRUE) {
+  library(plyr)
+  
+  # New version of length which can handle NA's: if na.rm==T, don't count them
+  length2 <- function (x, na.rm=FALSE) {
+    if (na.rm) sum(!is.na(x))
+    else       length(x)
+  }
+  
+  # This does the summary. For each group's data frame, return a vector with
+  # N, mean, and sd
+  datac <- ddply(data, groupvars, .drop=.drop,
+                 .fun = function(xx, col) {
+                   c(N    = length2(xx[[col]], na.rm=na.rm),
+                     mean = mean   (xx[[col]], na.rm=na.rm),
+                     sd   = sd     (xx[[col]], na.rm=na.rm)
+                   )
+                 },
+                 measurevar
+  )
+  
+  # Rename the "mean" column    
+  datac <- rename(datac, c("mean" = measurevar))
+  
+  datac$se <- datac$sd / sqrt(datac$N)  # Calculate standard error of the mean
+  
+  # Confidence interval multiplier for standard error
+  # Calculate t-statistic for confidence interval: 
+  # e.g., if conf.interval is .95, use .975 (above/below), and use df=N-1
+  ciMult <- qt(conf.interval/2 + .5, datac$N-1)
+  datac$ci <- datac$se * ciMult
+  
+  return(datac)
+}
+
+normDataWithin <- function(data=NULL, idvar, measurevar, betweenvars=NULL,
+                           na.rm=FALSE, .drop=TRUE) {
+  library(plyr)
+  
+  # Measure var on left, idvar + between vars on right of formula.
+  data.subjMean <- ddply(data, c(idvar, betweenvars), .drop=.drop,
+                         .fun = function(xx, col, na.rm) {
+                           c(subjMean = mean(xx[,col], na.rm=na.rm))
+                         },
+                         measurevar,
+                         na.rm
+  )
+  
+  # Put the subject means with original data
+  data <- merge(data, data.subjMean)
+  
+  # Get the normalized data in a new column
+  measureNormedVar <- paste(measurevar, "_norm", sep="")
+  data[,measureNormedVar] <- data[,measurevar] - data[,"subjMean"] +
+    mean(data[,measurevar], na.rm=na.rm)
+  
+  # Remove this subject mean column
+  data$subjMean <- NULL
+  
+  return(data)
+}
+
+summarySEwithin <- function(data=NULL, measurevar, betweenvars=NULL, withinvars=NULL,
+                            idvar=NULL, na.rm=FALSE, conf.interval=.95, .drop=TRUE) {
+  
+  # Ensure that the betweenvars and withinvars are factors
+  factorvars <- vapply(data[, c(betweenvars, withinvars), drop=FALSE],
+                       FUN=is.factor, FUN.VALUE=logical(1))
+  
+  if (!all(factorvars)) {
+    nonfactorvars <- names(factorvars)[!factorvars]
+    message("Automatically converting the following non-factors to factors: ",
+            paste(nonfactorvars, collapse = ", "))
+    data[nonfactorvars] <- lapply(data[nonfactorvars], factor)
+  }
+  
+  # Get the means from the un-normed data
+  datac <- summarySE(data, measurevar, groupvars=c(betweenvars, withinvars),
+                     na.rm=na.rm, conf.interval=conf.interval, .drop=.drop)
+  
+  # Drop all the unused columns (these will be calculated with normed data)
+  datac$sd <- NULL
+  datac$se <- NULL
+  datac$ci <- NULL
+  
+  # Norm each subject's data
+  ndata <- normDataWithin(data, idvar, measurevar, betweenvars, na.rm, .drop=.drop)
+  
+  # This is the name of the new column
+  measurevar_n <- paste(measurevar, "_norm", sep="")
+  
+  # Collapse the normed data - now we can treat between and within vars the same
+  ndatac <- summarySE(ndata, measurevar_n, groupvars=c(betweenvars, withinvars),
+                      na.rm=na.rm, conf.interval=conf.interval, .drop=.drop)
+  
+  # Apply correction from Morey (2008) to the standard error and confidence interval
+  #  Get the product of the number of conditions of within-S variables
+  nWithinGroups    <- prod(vapply(ndatac[,withinvars, drop=FALSE], FUN=nlevels,
+                                  FUN.VALUE=numeric(1)))
+  correctionFactor <- sqrt( nWithinGroups / (nWithinGroups-1) )
+  
+  # Apply the correction factor
+  ndatac$sd <- ndatac$sd * correctionFactor
+  ndatac$se <- ndatac$se * correctionFactor
+  ndatac$ci <- ndatac$ci * correctionFactor
+  
+  # Combine the un-normed means with the normed results
+  merge(datac, ndatac)
+}
+
+
+############################
+#### tables for plotting ###
+
+# summarySE provides the standard deviation, standard error of the mean, and a (default 95%) confidence interval
+condition.sum.table <- summarySE(df.filtered, measurevar="sentimentScore", groupvars=c("condition"))
+condition.sum.table
+
+
+sex.condition.sum.table <- summarySEwithin(df.filtered, measurevar="sentimentScore", withinvars=c("sex","condition"), idvar="participantId")
+sex.condition.sum.table
+
+sex.ethnicity.sum.table <- summarySEwithin(df.filtered, measurevar="sentimentScore", withinvars=c("sex","ethnicity"), idvar="participantId")
+sex.ethnicity.sum.table
+
+############################
+### Effect of Condition ####
+
+# Mean + Standard error of the mean
+ggplot(condition.sum.table, aes(y=sentimentScore, x=condition, colour=condition)) + 
+  geom_errorbar(aes(ymin=sentimentScore-se, ymax=sentimentScore+se), width=.1) +
+  geom_point() + 
+  labs (title= "Mean and SEM sentiment score by survey language")
+
+s <- svgstring(width = 7,
+               height = 5)
+
+ggplot(condition.sum.table, aes(y=sentimentScore, x=condition, colour=condition)) + 
+  geom_errorbar(aes(ymin=sentimentScore-se, ymax=sentimentScore+se), width=.1) +
+  geom_point() + 
+  labs (title= "Mean and SEM sentiment score by survey language")
+
+chart <- s()
+cat(chart , file = "lmer_output/language_effect_free_mturk_espanol.txt")
+cat(chart , file = "../../emotions_dashboard/data/language_effect_free_mturk_espanol.txt")
+dev.off()
 
 # 
-# library(rstatix)
-# library(ggpubr)
-# library(ez) 
+# ## histogram 
+# ggplot(df.filtered, aes(sentimentScore, fill=condition, colour=condition)) +
+#   geom_histogram(aes(y=..density..), breaks=seq(-1,1,0.05), alpha=0.5, 
+#                  position="identity", lwd=0.2) +
+#   ggtitle("Sentiment score by survey language (normalized density)")
+
+
+##############################
+### Sex * Condition effect ###
+
+
+# Mean + std error of the mean 
+ggplot(sex.condition.sum.table, aes(x=condition, y=sentimentScore, fill=sex, color=sex)) +
+  geom_errorbar(aes(ymin=sentimentScore-se, ymax=sentimentScore+se), width=.1) +
+  geom_point() + 
+  labs (title= "Mean and SEM sentiment score by survey language and sex")
+
+s <- svgstring(width = 7,
+               height = 5)
+
+ggplot(sex.ethnicity.sum.table, aes(x=ethnicity, y=sentimentScore, fill=sex, color=sex)) +
+  geom_errorbar(aes(ymin=sentimentScore-se, ymax=sentimentScore+se), width=.1) +
+  geom_point() + 
+  labs (title= "Mean and SEM sentiment score by survey language and sex")
+
+chart <- s()
+cat(chart , file = "lmer_output/sex_language_effect_free_mturk_espanol.txt")
+cat(chart , file = "../../emotions_dashboard/data/sex_language_effect_free_mturk_espanol.txt")
+dev.off()
+
+## histogram 
+# ggplot(df.filtered, aes(sentimentScore, fill=sex, colour=sex)) +
+#   geom_histogram(aes(y=..density..), breaks=seq(-1,1,0.05), alpha=0.5, 
+#                  position="identity", lwd=0.2) +
+#   facet_grid(. ~condition) 
+
+###############################
+### Sex * Ethnicity effect ####
+
+# Mean + std error of the mean 
+ggplot(sex.ethnicity.sum.table, aes(x=ethnicity, y=sentimentScore, fill=sex, color=sex)) +
+  geom_errorbar(aes(ymin=sentimentScore-se, ymax=sentimentScore+se), width=.1) +
+  geom_point() + 
+  labs (title= "Mean and SEM sentiment score by sex and ethnicity ")
+
+
+s <- svgstring(width = 7,
+               height = 5)
+
+ggplot(sex.ethnicity.sum.table, aes(x=ethnicity, y=sentimentScore, fill=sex, color=sex)) +
+  geom_errorbar(aes(ymin=sentimentScore-se, ymax=sentimentScore+se), width=.1) +
+  geom_point() + 
+  labs (title= "Mean and SEM sentiment score by sex and ethnicity ")
+
+chart <- s()
+cat(chart , file = "lmer_output/sex_et_effect_free_mturk_espanol.txt")
+cat(chart , file = "../../emotions_dashboard/data/sex_et_effect_free_mturk_espanol.txt")
+dev.off()
 # 
-# df %>%
-#   group_by(sex, ethnicity) %>%
-#   get_summary_stats(sentimentScore, type = "mean_sd")
 # 
-# bxp.sex <- ggboxplot(
-#     df, 
-#     x = "sex",
-#     y = "sentimentScore",
-#     palette = "jco"
-#   )
-# bxp.sex
-# 
-# bxp.ethnicity <- ggboxplot(
-#     df, 
-#     x = "ethnicity",
-#     y = "sentimentScore",
-#     palette = "jco"
-#   )
-# bxp.ethnicity
-# 
-# bxp <- ggboxplot(
-#     df,
-#     x = "sex",
-#     y = "sentimentScore",
-#     color = "ethnicity",
-#     palette = "jco"
-#   )
-# bxp
-# 
-# df %>%
-#   group_by(ethnicity, sex) %>%
-#   identify_outliers(sentimentScore)
-# 
-# # no outliers
-# 
-# df %>%
-#   group_by(ethnicity, sex) %>%
-#   shapiro_test(sentimentScore)
-# 
-# # not normal
-# 
-# ggqqplot(df, "sentimentScore", ggtheme = theme_bw()) +
-#   facet_grid(sex ~ ethnicity, labeller = "label_both")
-# 
-# res.aov  = ezANOVA(data=df,
-#                    wid=.(participantId), 
-#                    dv=.(sentimentScore), 
-#                    within=.(sex, ethnicity))
-# res.aov  
+# ## histogram 
+# ggplot(df.filtered, aes(sentimentScore, fill=sex, colour=sex)) +
+#   geom_histogram(aes(y=..density..), breaks=seq(-1,1,0.05), alpha=0.5, 
+#                  position="identity", lwd=0.2) +
+#   facet_grid(. ~ethnicity) 
+
+
+
