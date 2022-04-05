@@ -129,7 +129,6 @@ library(ggplot2)
 # reove outlier
 
 
-
 rankd.df<-subset(rankd.df, rank.cnt.web!="134051" & rank.cnt.web!="52242")
 
 
