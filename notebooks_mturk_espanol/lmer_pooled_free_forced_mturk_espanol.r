@@ -308,6 +308,9 @@ correct.survey.plot <- ggplot(correct.survey, aes(x=condition, y=correct)) +
 
 correct.survey.plot
 
+ggsave('accuracy-charts/correct-survey.png', width = 4, height = 4)
+
+
 ###############
 # correct by emotion
 
@@ -323,6 +326,9 @@ correct.label.plot <- ggplot(correct.label, aes(x = reorder(label, -correct), y=
                               labs(x = "expected emotion label")
 
 correct.label.plot
+
+ggsave('accuracy-charts/correct-survey-emotion.png', width = 6, height = 4)
+
 
 ###############
 # correct proportion by emotion and condition
@@ -342,6 +348,9 @@ correct.survey.label.plot <- ggplot(correct.survey.label, aes(x = reorder(label,
                         labs(x = "expected emotion label")
 
 correct.survey.label.plot
+
+ggsave('accuracy-charts/correct-label-survey.png', width = 8, height = 4)
+
 
 # ####################################
 # # LMER adding ethnicity as covariate

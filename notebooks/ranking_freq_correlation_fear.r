@@ -123,14 +123,23 @@ library(ggplot2)
 # rank.web ~ rank.survey
 ggplot(rankd.df, aes(x=rank.cnt.survey, y=rank.cnt.web)) + 
   geom_point() +
-  geom_smooth()
+  geom_smooth()  +
+  labs(x = "rank survey",
+       y = "rank web",
+       title =  "fear - dueling-bandit~web correlation")
 
+ggsave("rank-cor/fear-web-survey.png", width = 4, height = 4)
 
 #######################
 # rank.web ~ rank.borda
 ggplot(rankd.df, aes(x=rank.borda, y=rank.cnt.web)) + 
   geom_point() +
-  geom_smooth()
+  geom_smooth() +
+  labs(x = "rank survey",
+       y = "rank web",
+       title =  "fear - dueling-bandit~web correlation")
+
+ggsave("rank-cor/fear-dueling-survey.png", width = 4, height = 4)
 
 
 ###################

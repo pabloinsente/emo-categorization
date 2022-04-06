@@ -136,14 +136,23 @@ rankd.df<-subset(rankd.df, rank.cnt.web!="134051" & rank.cnt.web!="52242")
 # rank.web ~ rank.survey
 ggplot(rankd.df, aes(x=rank.cnt.survey, y=rank.cnt.web)) + 
   geom_point() +
-  geom_smooth()
+  geom_smooth()  +
+  labs(x = "rank survey",
+       y = "rank web",
+       title = "sadness - survey~web correlation")
 
+ggsave("rank-cor/sadness-web-survey.png", width = 4, height = 4)
 
 #######################
 # rank.web ~ rank.borda
 ggplot(rankd.df, aes(x=rank.borda, y=rank.cnt.web)) + 
   geom_point() +
-  geom_smooth()
+  geom_smooth() +
+  labs(x = "rank survey",
+       y = "rank web",
+       title =  "sadness - dueling-bandit~web correlation")
+
+ggsave("rank-cor/sadness-dueling-survey.png", width = 4, height = 4)
 
 
 ###################
