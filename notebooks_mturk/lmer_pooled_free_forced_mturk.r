@@ -1,4 +1,6 @@
 library(tidyverse)
+library(svglite)
+library(equatiomatic)
 
 df.free = read_csv("../clean_data_mturk/free_labeling_emotion_mturk_long_format_lmer.csv")
 df.forced = read_csv("../clean_data_mturk/forced_choice_emotion_mturk_long_format_lmer.csv")
@@ -119,6 +121,12 @@ exp(fix.effect) # 0.081
 plogis(fix.effect) # 0.075
 
 
+### get mathematical formula
+formula_lmer <- extract_eq(m1)
+
+cat(formula_lmer, file = "lmer_output/formula_log_lmer_mturk.txt")
+cat(formula_lmer, file = "../../emotions_dashboard/data/formula_log_lmer_mturk.txt")
+
 ## Notes about interpretation:
 # https://stats.stackexchange.com/questions/365907/interpretation-of-fixed-effects-from-mixed-effect-logistic-regression
 # https://stats.oarc.ucla.edu/other/mult-pkg/introduction-to-generalized-linear-mixed-models/
@@ -141,6 +149,29 @@ plot_model(m1, type = "emm", terms = "condition.dummy")
 
 tab_model(m1)
 tab_model(m2)
+
+
+s <- svgstring(width = 7,
+               height = 5)
+
+plot_model(m1, type = "pred", terms = "condition.dummy")
+
+svg.string.plot <- s()
+
+cat(svg.string.plot, file = "lmer_output/predicted_prob_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/predicted_prob_mturk.txt")
+
+dev.off()
+
+tab_model(m1)
+tab_model(m1,transform =  "plogis")
+
+
+### get coefficient table for reporting
+tab_model(m1, transform =  "plogis", file = "lmer_output/lmer_summary_free_vs_forced_mturk.html")
+tab_model(m1, transform =  "plogis", file = "../../emotions_dashboard/data/lmer_summary_free_vs_forced_mturk.html")
+
+
 
 
 ######################
@@ -300,6 +331,19 @@ correct.survey.plot
 
 ggsave('accuracy-charts/correct-survey.png', width = 4, height = 4)
 
+s <- svgstring(width = 7,
+               height = 5)
+
+correct.survey.plot
+
+svg.string.plot <- s()
+
+cat(svg.string.plot, file = "lmer_output/correct-survey_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-survey_mturk.txt")
+
+dev.off()
+
+
 
 ###############
 # correct by emotion
@@ -316,6 +360,19 @@ correct.label.plot <- ggplot(correct.label, aes(x = reorder(label, -correct), y=
                               labs(x = "expected emotion label")
 
 correct.label.plot
+
+s <- svgstring(width = 7,
+               height = 5)
+
+correct.label.plot
+
+svg.string.plot <- s()
+
+cat(svg.string.plot, file = "lmer_output/correct-label_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label_mturk.txt")
+
+dev.off()
+
 
 ggsave('accuracy-charts/correct-survey-emotion.png', width = 6, height = 4)
 
@@ -338,6 +395,19 @@ correct.survey.label.plot <- ggplot(correct.survey.label, aes(x = reorder(label,
                         labs(x = "expected emotion label")
 
 correct.survey.label.plot
+
+s <- svgstring(width = 7,
+               height = 5)
+
+correct.survey.label.plot
+
+svg.string.plot <- s()
+
+cat(svg.string.plot, file = "lmer_output/correct-label-survey_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label-survey_mturk.txt")
+
+dev.off()
+
 
 ggsave('accuracy-charts/correct-label-survey.png', width = 8, height = 4)
 
