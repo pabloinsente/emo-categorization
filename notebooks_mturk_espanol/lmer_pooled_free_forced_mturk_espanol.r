@@ -16,8 +16,11 @@ df.free$label <- plyr::mapvalues(df.free$label,
                                    from=c("enfado", "felicidad", "asco", "tristeza", "miedo", "sorpresa", "incertidumbre"), 
                                    to=c("anger", "happiness", "disgust", 'sadness', 'fear', 'surprise', 'uncertain'))
 
+
+
 ## match spelling
 df.forced$emotion <- tolower(df.forced$emotion)
+df.free$emotion <- tolower(df.free$emotion)
 
 ## remove uncertain as it means "I don't know" 
 df.free <- subset(df.free, label!="uncertain")
@@ -50,7 +53,7 @@ head(df.forced)
 ##########################
 
 
-dim(table(df.free$emotion)) # 457
+dim(table(df.free$emotion)) # 455
 table(df.free$label)
 
 head(df.free)
@@ -70,8 +73,16 @@ head(df.free)
 # Comparison 
 ###################
 
-mean(df.forced$correct)
-mean(df.free$correct)
+sum(df.free$emotion == 'anger') # 669
+sum(df.free$emotion == 'disgust') # 372
+sum(df.free$emotion == 'fear') # 32
+sum(df.free$emotion == 'happiness') # 627
+sum(df.free$emotion == 'neutral') # 146
+sum(df.free$emotion == 'sadness') # 657
+sum(df.free$emotion == 'surprise') # 828
+
+mean(df.forced$correct) # 70
+mean(df.free$correct) # 26
 
 ##################
 # join dataframes for lmer
@@ -80,7 +91,7 @@ mean(df.free$correct)
 df.free$participantId <- df.free$participantId + 100 
 
 dim(table(df.forced$photoId)) # 168
-dim(table(df.free$photoId))  # 670
+dim(table(df.free$photoId))  # 504
 
 df.forced$photoId <- gsub("\\..*","",df.forced$photoId)
 df.free$photoId <- gsub("\\..*","", df.free$photoId)
@@ -135,8 +146,8 @@ plogis(fix.effect) # 0.079
 ### get mathematical formula
 formula_lmer <- extract_eq(m1)
 
-cat(formula_lmer, file = "lmer_output/formula_log_lmer_mturk_espanol.txt")
-cat(formula_lmer, file = "../../emotions_dashboard/data/formula_log_lmer_mturk_espanol.txt")
+cat(formula_lmer, file = "lmer_output/formula_log_lmer_mturk_espanol_raw.txt")
+cat(formula_lmer, file = "../../emotions_dashboard/data/formula_log_lmer_mturk_espanol_raw.txt")
 
 
 
@@ -164,7 +175,6 @@ tab_model(m1)
 tab_model(m2)
 
 
-
 s <- svgstring(width = 7,
                height = 5)
 
@@ -172,8 +182,8 @@ plot_model(m1, type = "pred", terms = "condition.dummy")
 
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/predicted_prob_mturk_espanol.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/predicted_prob_mturk_espanol.txt")
+cat(svg.string.plot, file = "lmer_output/predicted_prob_mturk_espanol_raw.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/predicted_prob_mturk_espanol_raw.txt")
 
 dev.off()
 
@@ -182,8 +192,8 @@ tab_model(m1,transform =  "plogis")
 
 
 ### get coefficient table for reporting
-tab_model(m1, transform =  "plogis", file = "lmer_output/lmer_summary_free_vs_forced_mturk_espanol.html")
-tab_model(m1, transform =  "plogis", file = "../../emotions_dashboard/data/lmer_summary_free_vs_forced_mturk_espanol.html")
+tab_model(m1, transform =  "plogis", file = "lmer_output/lmer_summary_free_vs_forced_mturk_espanol_raw.html")
+tab_model(m1, transform =  "plogis", file = "../../emotions_dashboard/data/lmer_summary_free_vs_forced_mturk_espanol_raw.html")
 
 
 
@@ -349,13 +359,13 @@ correct.survey.plot
 
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/correct-survey_mturk_espanol.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-survey_mturk_espanol.txt")
+cat(svg.string.plot, file = "lmer_output/correct-survey_mturk_espanol_raw.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-survey_mturk_espanol_raw.txt")
 
 dev.off()
 
 
-ggsave('accuracy-charts/correct-survey.png', width = 4, height = 4)
+ggsave('accuracy-charts/correct-survey-raw.png', width = 4, height = 4)
 
 
 ###############
@@ -382,13 +392,13 @@ correct.label.plot
 
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/correct-label_mturk_espanol.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label_mturk_espanol.txt")
+cat(svg.string.plot, file = "lmer_output/correct-label_mturk_espanol_raw.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label_mturk_espanol_raw.txt")
 
 dev.off()
 
 
-ggsave('accuracy-charts/correct-survey-emotion.png', width = 6, height = 4)
+ggsave('accuracy-charts/correct-survey-emotion-raw.png', width = 6, height = 4)
 
 
 ###############
@@ -418,12 +428,12 @@ correct.survey.label.plot
 
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/correct-label-survey_mturk_espanol.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label-survey_mturk_espanol.txt")
+cat(svg.string.plot, file = "lmer_output/correct-label-survey_mturk_espanol_raw.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label-survey_mturk_espanol_raw.txt")
 
 dev.off()
 
-ggsave('accuracy-charts/correct-label-survey.png', width = 8, height = 4)
+ggsave('accuracy-charts/correct-label-survey-raw.png', width = 8, height = 4)
 
 
 # ####################################

@@ -5,6 +5,8 @@ library(equatiomatic)
 df.free = read_csv("../clean_data_mturk/free_labeling_emotion_mturk_long_format_lmer.csv")
 df.forced = read_csv("../clean_data_mturk/forced_choice_emotion_mturk_long_format_lmer.csv")
 
+syns = fromJSON(file = "../clean_data/syn_dict_emotions.json")
+
 ## match spelling
 df.forced$emotion <- tolower(df.forced$emotion)
 df.free$emotion <- tolower(df.free$emotion)
@@ -29,8 +31,8 @@ df.forced$correct <- ifelse(df.forced$emotion == df.forced$label, 1, 0)
 
 ## add between subjects predictor 
 df.forced$condition <- "forced"
-df.forced$condition.dummy <- 0
-df.forced$condition.center <- -.5
+df.forced$condition.dummy <- 1
+df.forced$condition.center <- .5
 
 
 head(df.forced)
@@ -38,9 +40,106 @@ head(df.forced)
 ##########################
 # Free-choice pre-processing
 ##########################
+library(plyr)
+
+####################
+# group by synonyms
 
 
-dim(table(df.free$emotion)) # 1081
+## baseline count 
+sum(df.free$emotion == 'anger') # 848
+sum(df.free$emotion == 'disgust') # 536
+sum(df.free$emotion == 'fear') # 356
+sum(df.free$emotion == 'happiness') # 1064
+sum(df.free$emotion == 'neutral') # 181
+sum(df.free$emotion == 'sadness') # 1195
+sum(df.free$emotion == 'surprise') # 530
+
+
+# anger
+n = length(syns$anger)
+from_words = syns$anger
+to_word = replicate(n, 'anger')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# angry
+n = length(syns$angry)
+from_words = syns$angry
+to_word = replicate(n, 'anger')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+
+# disgust
+n = length(syns$disgust)
+from_words = syns$disgust
+to_word = replicate(n, 'disgust')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# disgusted
+n = length(syns$disgusted)
+from_words = syns$disgusted
+to_word = replicate(n, 'disgust')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+
+# sadness
+n = length(syns$sadness)
+from_words = syns$sadness
+to_word = replicate(n, 'sadness')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# sad
+n = length(syns$sad)
+from_words = syns$sad
+to_word = replicate(n, 'sadness')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+
+
+# fear
+n = length(syns$fear)
+from_words = syns$fear
+to_word = replicate(n, 'fear')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# fearful
+n = length(syns$fearful)
+from_words = syns$fearful
+to_word = replicate(n, 'fear')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+
+# surprise
+n = length(syns$surprise)
+from_words = syns$surprise
+to_word = replicate(n, 'surprise')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# surprised
+n = length(syns$surprised)
+from_words = syns$surprised
+to_word = replicate(n, 'surprise')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+
+
+# happiness
+n = length(syns$happiness)
+from_words = syns$happiness
+to_word = replicate(n, 'happiness')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# happy
+n = length(syns$happy)
+from_words = syns$happy
+to_word = replicate(n, 'happiness')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+
+# neutral
+n = length(syns$neutral)
+from_words = syns$neutral
+to_word = replicate(n, 'neutral')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+
+sum(df.free$emotion == 'anger') # 953
+sum(df.free$emotion == 'disgust') # 576
+sum(df.free$emotion == 'fear') # 384
+sum(df.free$emotion == 'happiness') # 1258
+sum(df.free$emotion == 'neutral') # 208
+sum(df.free$emotion == 'sadness') # 1366
+sum(df.free$emotion == 'surprise') # 601
+
+
+dim(table(df.free$emotion)) # 847
 table(df.free$label)
 
 head(df.free)
@@ -50,8 +149,8 @@ df.free$correct <- ifelse(df.free$emotion == df.free$label, 1, 0)
 
 ## add between subjects predictor 
 df.free$condition <- "free"
-df.free$condition.dummy <- 1
-df.free$condition.center <- .5
+df.free$condition.dummy <- 0
+df.free$condition.center <- -.5
 
 head(df.free)
 
@@ -60,16 +159,8 @@ head(df.free)
 # Comparison 
 ###################
 
-sum(df.free$emotion == 'anger') # 848
-sum(df.free$emotion == 'disgust') # 536
-sum(df.free$emotion == 'fear') # 356
-sum(df.free$emotion == 'happiness') # 1064
-sum(df.free$emotion == 'neutral') # 181
-sum(df.free$emotion == 'sadness') # 1195
-sum(df.free$emotion == 'surprise') # 530
-
-mean(df.forced$correct)
-mean(df.free$correct)
+mean(df.forced$correct) # 0.5941317
+mean(df.free$correct) # 0.2467115
 
 
 ##################
@@ -110,11 +201,11 @@ m1 <- glmer(correct ~ 1 + condition.dummy + (1 | participantIdF) +  (1 | photoId
 
 summary(m1)
 
-fix.effect = -2.5125
+fix.effect = -1.81
 ## odd ratio
-exp(fix.effect) # 0.081
+exp(fix.effect) # 0.163
 ## probability
-plogis(fix.effect) # 0.074
+plogis(fix.effect) # 0.140
 
 ## centered  predictor
 m2 <- glmer(correct ~ 1 + condition.center + (1 | participantIdF)  + (1 | photoIdF),
@@ -123,11 +214,11 @@ m2 <- glmer(correct ~ 1 + condition.center + (1 | participantIdF)  + (1 | photoI
 
 summary(m2)
 
-fix.effect = -2.51
+fix.effect = -1.81
 ## odd ratio
-exp(fix.effect) # 0.081
+exp(fix.effect) # 0.163
 ## probability
-plogis(fix.effect) # 0.075
+plogis(fix.effect) # 0.140
 
 
 ### get mathematical formula
@@ -167,8 +258,8 @@ plot_model(m1, type = "pred", terms = "condition.dummy")
 
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/predicted_prob_mturk_raw.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/predicted_prob_mturk_raw.txt")
+cat(svg.string.plot, file = "lmer_output/predicted_prob_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/predicted_prob_mturk.txt")
 
 dev.off()
 
@@ -177,8 +268,15 @@ tab_model(m1,transform =  "plogis")
 
 
 ### get coefficient table for reporting
-tab_model(m1, transform =  "plogis", file = "lmer_output/lmer_summary_free_vs_forced_mturk_raw.html")
-tab_model(m1, transform =  "plogis", file = "../../emotions_dashboard/data/lmer_summary_free_vs_forced_mturk_raw.html")
+
+
+# odds ratio
+tab_model(m1, file = "lmer_output/lmer_summary_odds_free_vs_forced_mturk.html")
+tab_model(m1, file = "../../emotions_dashboard/data/lmer_summary_odds_free_vs_forced_mturk.html")
+
+#probs
+tab_model(m1, transform =  "plogis", file = "lmer_output/lmer_summary_free_vs_forced_mturk.html")
+tab_model(m1, transform =  "plogis", file = "../../emotions_dashboard/data/lmer_summary_free_vs_forced_mturk.html")
 
 
 
@@ -331,14 +429,18 @@ summarySEwithin <- function(data=NULL, measurevar, betweenvars=NULL, withinvars=
 correct.survey <- summarySE(df, measurevar="correct", groupvars=c("condition"))
 
 correct.survey.plot <- ggplot(correct.survey, aes(x=condition, y=correct)) + 
-                              geom_bar(position=position_dodge(), stat="identity") +
-                              geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
-                                            width=.2,                    # Width of the error bars
-                                            position=position_dodge(.9))
+  geom_bar(position=position_dodge(), stat="identity") +
+  geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
+                width=.2,                    # Width of the error bars
+                position=position_dodge(.9)) +
+  labs(x = "survey condition",
+       title = "Correct responses grouped by Wordnet synonyms") + 
+  theme(plot.title = element_text(size=9))
+
 
 correct.survey.plot
 
-ggsave('accuracy-charts/correct-survey-raw.png', width = 4, height = 4)
+ggsave('accuracy-charts/correct-survey.png', width = 4, height = 4)
 
 s <- svgstring(width = 7,
                height = 5)
@@ -347,8 +449,8 @@ correct.survey.plot
 
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/correct-survey_mturk_raw.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-survey_mturk_raw.txt")
+cat(svg.string.plot, file = "lmer_output/correct-survey_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-survey_mturk.txt")
 
 dev.off()
 
@@ -362,11 +464,14 @@ correct.label <- summarySE(df, measurevar="correct", groupvars=c("label"))
 correct.label
 
 correct.label.plot <- ggplot(correct.label, aes(x = reorder(label, -correct), y=correct)) + 
-                              geom_bar(position=position_dodge(), stat="identity") +
-                              geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
-                                            width=.2,                    # Width of the error bars
-                                            position=position_dodge(.9)) +
-                              labs(x = "expected emotion label")
+  geom_bar(position=position_dodge(), stat="identity") +
+  geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
+                width=.2,                    # Width of the error bars
+                position=position_dodge(.9)) +
+  labs(x = "expected emotion label",
+       title = "Correct responses grouped by Wordnet synonyms") + 
+  theme(plot.title = element_text(size=9))
+
 
 correct.label.plot
 
@@ -377,13 +482,13 @@ correct.label.plot
 
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/correct-label_mturk_raw.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label_mturk_raw.txt")
+cat(svg.string.plot, file = "lmer_output/correct-label_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label_mturk.txt")
 
 dev.off()
 
 
-ggsave('accuracy-charts/correct-survey-emotion-raw.png', width = 6, height = 4)
+ggsave('accuracy-charts/correct-survey-emotion.png', width = 6, height = 4)
 
 
 ###############
@@ -391,17 +496,19 @@ ggsave('accuracy-charts/correct-survey-emotion-raw.png', width = 6, height = 4)
 
 
 correct.survey.label <-  summarySEwithin(df, measurevar="correct",
-                        betweenvars="condition",
-                        withinvars=c("label"), 
-                        idvar="participantId")
+                                         betweenvars="condition",
+                                         withinvars=c("label"), 
+                                         idvar="participantId")
 
 
 correct.survey.label.plot <- ggplot(correct.survey.label, aes(x = reorder(label, -correct), y=correct, fill=condition)) + 
-                        geom_bar(position=position_dodge(), stat="identity") +
-                        geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
-                                      width=.2,                    # Width of the error bars
-                                      position=position_dodge(.9)) +
-                        labs(x = "expected emotion label")
+  geom_bar(position=position_dodge(), stat="identity") +
+  geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
+                width=.2,                    # Width of the error bars
+                position=position_dodge(.9)) +
+  labs(x = "expected emotion label",
+       title = "Correct responses grouped by Wordnet synonyms") + 
+  theme(plot.title = element_text(size=9))
 
 correct.survey.label.plot
 
@@ -412,13 +519,13 @@ correct.survey.label.plot
 
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/correct-label-survey_mturk_raw.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label-survey_mturk_raw.txt")
+cat(svg.string.plot, file = "lmer_output/correct-label-survey_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label-survey_mturk.txt")
 
 dev.off()
 
 
-ggsave('accuracy-charts/correct-label-survey-raw.png', width = 8, height = 4)
+ggsave('accuracy-charts/correct-label-survey.png', width = 8, height = 4)
 
 # ####################################
 # # LMER adding ethnicity as covariate

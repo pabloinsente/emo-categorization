@@ -10,7 +10,7 @@ library(rstatix)
 # read students ranking 
 df.rank = read_csv('../data/emotion_top_2_word_survey_dueling_bandits.csv')
 
-# read frequency in the web rankig
+# read frequency in the web ranking
 unigram.freq= read_csv('../data/unigram_freq.csv')
 
 head(df.rank)

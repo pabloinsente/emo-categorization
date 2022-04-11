@@ -1,13 +1,16 @@
 library(tidyverse)
 library(svglite)
 library(equatiomatic)
-
+library(rjson)
 
 df.free = read_csv("../clean_data/free_labeling_emotion_uw_students_long_format_lmer.csv")
 df.forced = read_csv("../clean_data/forced_choice_emotion_uw_students_long_format_lmer.csv")
 
+syns = fromJSON(file = "../clean_data/syn_dict_emotions.json")
+
 ## match spelling
 df.forced$emotion <- tolower(df.forced$emotion)
+df.free$emotion <- tolower(df.free$emotion)
 
 ## remove uncertain as it means "I don't know" 
 df.free <- subset(df.free, label!="uncertain")
@@ -39,8 +42,9 @@ head(df.forced)
 # Free-choice pre-processing
 ##########################
 
+table(df.free$emotion)
 
-dim(table(df.free$emotion)) # 1316
+dim(table(df.free$emotion)) # 1056
 table(df.free$label)
 
 head(df.free)
@@ -60,8 +64,16 @@ head(df.free)
 # Comparison 
 ###################
 
-mean(df.forced$correct)
-mean(df.free$correct)
+sum(df.free$emotion == 'anger') # 435
+sum(df.free$emotion == 'disgust') # 294
+sum(df.free$emotion == 'fear') # 31
+sum(df.free$emotion == 'happiness') # 830
+sum(df.free$emotion == 'neutral') # 16
+sum(df.free$emotion == 'sadness') # 749
+sum(df.free$emotion == 'surprise') # 262
+
+mean(df.forced$correct) # 65%
+mean(df.free$correct) # 13%
 
 
 ##################
@@ -157,8 +169,8 @@ plot_model(m1, type = "pred", terms = "condition.dummy")
 
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/predicted_prob_uw_students.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/predicted_prob_uw_students.txt")
+cat(svg.string.plot, file = "lmer_output/predicted_prob_uw_students_raw.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/predicted_prob_uw_students_raw.txt")
 
 dev.off()
 
@@ -167,8 +179,8 @@ tab_model(m1,transform =  "plogis")
 
 
 ### get coefficient table for reporting
-tab_model(m1, transform =  "plogis", file = "lmer_output/lmer_summary_free_vs_forced_uw_students.html")
-tab_model(m1, transform =  "plogis", file = "../../emotions_dashboard/data/lmer_summary_free_vs_forced_uw_students.html")
+tab_model(m1, transform =  "plogis", file = "lmer_output/lmer_summary_free_vs_forced_uw_students_raw.html")
+tab_model(m1, transform =  "plogis", file = "../../emotions_dashboard/data/lmer_summary_free_vs_forced_uw_students_raw.html")
 
 
 ######################
@@ -333,12 +345,12 @@ correct.survey.plot
 
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/correct-survey_uw_students.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-survey_uw_students.txt")
+cat(svg.string.plot, file = "lmer_output/correct-survey_uw_students_raw.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-survey_uw_students_raw.txt")
 
 dev.off()
 
-ggsave('accuracy-charts/correct-survey.png', width = 4, height = 4)
+ggsave('accuracy-charts/correct-survey-raw.png', width = 4, height = 4)
 
 ###############
 # correct by emotion
@@ -363,13 +375,13 @@ correct.label.plot
 
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/correct-label_uw_students.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label_uw_students.txt")
+cat(svg.string.plot, file = "lmer_output/correct-label_uw_students_raw.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label_uw_students_raw.txt")
 
 dev.off()
 
 
-ggsave('accuracy-charts/correct-label.png', width = 6, height = 4)
+ggsave('accuracy-charts/correct-label-raw.png', width = 6, height = 4)
 
 
 ###############
@@ -403,13 +415,13 @@ correct.survey.label.plot
 
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/correct-label-survey_uw_students.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label-survey_uw_students.txt")
+cat(svg.string.plot, file = "lmer_output/correct-label-survey_uw_students_raw.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label-survey_uw_students_raw.txt")
 
 dev.off()
 
 
-ggsave('accuracy-charts/correct-label-survey.png', width = 8, height = 4)
+ggsave('accuracy-charts/correct-label-survey-raw.png', width = 8, height = 4)
 
 # ####################################
 # # LMER adding ethnicity as covariate
