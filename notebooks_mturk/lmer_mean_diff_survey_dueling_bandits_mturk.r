@@ -12,7 +12,7 @@ library(equatiomatic)
 #####################
 
 # read students ranking 
-df.rank = read_csv('../data/emotion_top_2_word_survey_dueling_bandits.csv')
+df.rank = read_csv('../data_mturk/emotion_top_2_word_survey_dueling_bandits_mturk.csv')
 
 # read frequency in the web ranking
 unigram.freq= read_csv('../data/unigram_freq.csv')
@@ -37,14 +37,15 @@ head(df)
 
 ## check outliers 
 outliers <- df %>% identify_outliers(web.frequency)
-outliers # funny, well
+outliers # content, friendly, interested, serious
 
-# filter out outliers
-df2 <- subset(df, photoID != 4 & photoID != 13 & photoID != 14  & photoID != 15 & photoID != 16) 
+
+# filter out extreme outliers
+df2 <- subset(df, photoID != 15 & photoID != 13 & photoID != 20)
 
 ## Check normality assumption
 df2 %>% shapiro_test(web.frequency)
-# not normal 
+# not normal
 
 ggqqplot(df2, x = "web.frequency")
 # not normal
@@ -72,13 +73,13 @@ boxplot
 
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/web_freq_method_boxplot_uw_students.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/web_freq_method_boxplot_uw_students.txt")
+cat(svg.string.plot, file = "lmer_output/web_freq_method_boxplot_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/web_freq_method_boxplot_mturk.txt")
 
 dev.off()
 
 
-ggsave('accuracy-charts/web_freq_method_boxplot_uw_students.png', width = 8, height = 4)
+ggsave('accuracy-charts/web_freq_method_boxplot_mturk.png', width = 8, height = 4)
 
 ####################
 # T test 
@@ -111,24 +112,29 @@ summary(m1)
 
 tab_model(m1)
 
-tab_model(m1, file = "lmer_output/lmer_summary_method_ranking_uw_students.html")
-tab_model(m1, file = "../../emotions_dashboard/data/lmer_summary_method_ranking_uw_students.html")
+tab_model(m1, file = "lmer_output/lmer_summary_method_ranking_mturk.html")
+tab_model(m1, file = "../../emotions_dashboard/data/lmer_summary_method_ranking_mturk.html")
 
-
-# Response: web.frequency
-#              Chisq   Df Pr(>Chisq)    
-# (Intercept)  28.582  1  8.981e-08 ***
-# method.dummy 10.184  1  0.001417 ** 
 
 Anova(m1, type = "III")
+# 
+# Analysis of Deviance Table (Type III Wald chisquare tests)
+# 
+# Response: web.frequency
+# Chisq Df Pr(>Chisq)    
+# (Intercept)  18.6964  1  1.533e-05 ***
+#   method.dummy  4.8155  1    0.02821 *  
+#   ---
+#   Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
 
 ## Type III anova table with p-values for F-tests based on Satterthwaite's method
 
 aov <- anova(m1)
 
 aov.apa <- kable(aov, digits = 3, format = "html", caption = "ANOVA table for LMER coefficients")
-cat(aov.apa, file = "lmer_output/anova_lmer_method_ranking_free_uw_students.html")
-cat(aov.apa, file = "../../emotions_dashboard/data/anova_lmer_method_ranking_free_uw_students.html")
+cat(aov.apa, file = "lmer_output/anova_lmer_method_ranking_free_mturk.html")
+cat(aov.apa, file = "../../emotions_dashboard/data/anova_lmer_method_ranking_free_mturk.html")
 
 
 m2<-lmer(
@@ -148,8 +154,8 @@ Anova(m1, type = "III")
 ### get mathematical formula
 formula_lmer <- extract_eq(m1)
 
-cat(formula_lmer, file = "lmer_output/formula_method_lmer_uw_students.txt")
-cat(formula_lmer, file = "../../emotions_dashboard/data/formula_method_lmer_uw_students.txt")
+cat(formula_lmer, file = "lmer_output/formula_method_lmer_mturk.txt")
+cat(formula_lmer, file = "../../emotions_dashboard/data/formula_method_lmer_mturk.txt")
 
 
 #####################################
@@ -174,6 +180,8 @@ freq.method <- ggplot(method.table, aes(x=method, y=web.frequency.mean, color=me
                       labs (title= "Mean and SEM web frequency by survey method") +
                       guides(color="none")
 
+freq.method
+
 s <- svgstring(width = 7,
                height = 5)
 
@@ -181,13 +189,13 @@ freq.method
 
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/web_freq_method_uw_students.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/web_freq_method_uw_students.txt")
+cat(svg.string.plot, file = "lmer_output/web_freq_method_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/web_freq_method_mturk.txt")
 
 dev.off()
 
 
-ggsave('accuracy-charts/web_freq_method_uw_students.png', width = 8, height = 4)
+ggsave('accuracy-charts/web_freq_method_mturk.png', width = 8, height = 4)
 
 
 #%%%%%%%%%%%%%%%%%%%%%%%%
@@ -220,13 +228,13 @@ df2$Abs.Model.F.Res <-abs(df2$Model.F.Res) #creates a new column with the absolu
 df2$Model.F.Res2 <- df2$Abs.Model.F.Res^2 #squares the absolute values of the residuals to provide the more robust estimate
 Levene.Model.F <- lm(Model.F.Res2 ~ photoID, data=df2) #ANOVA of the squared residuals
 anova(Levene.Model.F) #displays the results
-format(4.440288e-07, scientific = F)
 
 # Since the p value > 0.05, all good
 
 Plot.Model.F <- plot(m1) #creates a fitted vs residual plot
 Plot.Model.F
 
+# looks fine
 
 #####################################
 #####################################
@@ -268,7 +276,7 @@ head(high_cooksd, n=10)
 
 #### high influence data points
 
-high_cooksd$id # 33 65 37 36 64 66
+high_cooksd$id # 26 30 27 29 28 25
 
 
 ##############
@@ -321,9 +329,7 @@ dotplot_diag(infl.classes$leverage.overall, name = "leverage", cutoff = CutOffLe
 
 # none
 
-high_cooksd$id
-
-
+###########################
 ##########################
 # filter out high cook ids
 
@@ -372,8 +378,6 @@ summary(m3)
 Anova(m3, type = "III")
 tab_model(m3)
 
-
-
 #####################################
 #####################################
 
@@ -397,3 +401,4 @@ freq.method <- ggplot(method.table.2, aes(x=method, y=web.frequency.mean, color=
   guides(color="none")
 
 freq.method
+
