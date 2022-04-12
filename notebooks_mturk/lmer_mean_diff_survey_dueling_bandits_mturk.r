@@ -231,10 +231,26 @@ anova(Levene.Model.F) #displays the results
 
 # Since the p value > 0.05, all good
 
+# save to html table
+aov.btw.res <- kable(anova(Levene.Model.F), digits = 3, format = "html", caption = "ANOVA table for between subjects residuals")
+
+cat(aov.btw.res, file = "lmer_output/anova_bwt_lmer_method_mturk.html")
+cat(aov.btw.res, file = "../../emotions_dashboard/data/anova_bwt_lmer_method_mturk.html")
+
 Plot.Model.F <- plot(m1) #creates a fitted vs residual plot
 Plot.Model.F
 
 # looks fine
+
+s <- svgstring(width = 7,
+               height = 5)
+
+Plot.Model.F
+
+Plot.Model.F <- s()
+cat(Plot.Model.F , file = "lmer_output/fitted_vs_residual_plot_method_mturk.txt")
+cat(Plot.Model.F , file = "../../emotions_dashboard/data/fitted_vs_residual_plot_method_mturk.txt")
+dev.off()
 
 #####################################
 #####################################
@@ -249,6 +265,14 @@ require("lattice")
 qqmath(m1, id=0.05) #id: identifies values that may be exerting undue influence on the model (i.e. outliers)
 
 
+s <- svgstring(width = 7,
+               height = 5)
+
+qqmath(m1, id=0.05) #id: identifies values that may be exerting undue influence on the model (i.e. outliers)
+svg.qqplot <- s()
+cat(svg.qqplot, file = "lmer_output/qqplot_lmer_method_mturk.txt")
+cat(svg.qqplot, file = "../../emotions_dashboard/data/qqplot_lmer_method_mturk.txt")
+dev.off()
 
 #####################################
 #####################################
@@ -268,6 +292,16 @@ print(CutOff)
 dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = CutOff)
 
 
+s <- svgstring(width = 7,
+               height = 5)
+
+# dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = "internal")
+dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = CutOff)
+svg.string.plot <- s()
+cat(svg.string.plot, file = "lmer_output/influence_datapoints_lmer_method_mturk .txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_datapoints_lmer_method_mturk.txt")
+dev.off()
+
 
 high_cooksd = infl[infl$cooksd > CutOff, ] %>%
   arrange(desc(cooksd))
@@ -284,7 +318,23 @@ high_cooksd$id # 26 30 27 29 28 25
 infl.classes <- hlm_influence(m1, level = "photoID")
 
 
+CutOffGroup = 4/21
+
+
 dotplot_diag(infl.classes$cooksd, name = "cooks.distance", cutoff = "internal", modify = "dotplot")
+
+
+s <- svgstring(width = 7,
+               height = 5)
+
+dotplot_diag(infl.classes$cooksd, name = "cooks.distance", cutoff = "internal", modify = "dotplot")
+
+svg.string.plot <- s()
+
+cat(svg.string.plot, file = "lmer_output/influence_participants_lmer_method_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_participants_lmer_method_mturk.txt")
+dev.off()
+
 
 
 high_cooksd_participants = infl.classes[infl.classes$cooksd > CutOffGroup, ] %>%
@@ -308,6 +358,19 @@ CutOffLeverage
 
 dotplot_diag(infl$leverage.overall, name = "leverage", cutoff = CutOffLeverage)
 
+
+s <- svgstring(width = 7,
+               height = 5)
+
+# dotplot_diag(infl$leverage.overall, name = "leverage", cutoff = "internal")
+dotplot_diag(infl$leverage.overall, name = "leverage", cutoff = CutOffLeverage)
+
+svg.string.plot <- s()
+cat(svg.string.plot, file = "lmer_output/leverage_datapoints_lmer_method_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/leverage_datapoints_lmer_method_mturk.txt")
+dev.off()
+
+
 # None
 
 high_leverage = infl[infl$leverage.overall > CutOffLeverage, ] %>%
@@ -326,6 +389,17 @@ CutOffLeverageParticipants = mean(infl.classes$leverage.overall)*3
 CutOffLeverageParticipants
 
 dotplot_diag(infl.classes$leverage.overall, name = "leverage", cutoff = CutOffLeverageParticipants)
+
+
+s <- svgstring(width = 7,
+               height = 5)
+
+dotplot_diag(infl.classes$leverage.overall, name = "leverage", cutoff = CutOffLeverageParticipants)
+
+svg.string.plot <- s()
+cat(svg.string.plot, file = "lmer_output/leverage_participants_lmer_method_mturk.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/leverage_participants_lmer_method_mturk.txt")
+dev.off()
 
 # none
 
@@ -361,12 +435,12 @@ df.filtered %>%
 
 
 # grouped boxplot
-boxplot <- ggplot(df.filtered, aes(x = method, y = web.frequency, color=method)) + 
+boxplot.re <- ggplot(df.filtered, aes(x = method, y = web.frequency, color=method)) + 
   geom_boxplot() +
   geom_point() +
   guides(color="none")
 
-boxplot
+boxplot.re
 
 #############
 # rerun
@@ -386,19 +460,90 @@ tab_model(m3)
 #####################################
 #####################################
 
-method.table.2 <- df.filtered %>%
+method.table.re <- df.filtered %>%
   group_by(method) %>%
   get_summary_stats(web.frequency, type = "mean_se")
 
-names(method.table.2)[4] <- "web.frequency.mean"
-method.table.2
+names(method.table.re)[4] <- "web.frequency.mean"
+method.table.re
 
 # # Mean + std error of the mean 
-freq.method <- ggplot(method.table.2, aes(x=method, y=web.frequency.mean, color=method)) +
+freq.method.re <- ggplot(method.table.re, aes(x=method, y=web.frequency.mean, color=method)) +
   geom_errorbar(aes(ymin=web.frequency.mean-se, ymax=web.frequency.mean+se), width=.1) +
   geom_point() +
   labs (title= "Mean and SEM web frequency by survey method") +
   guides(color="none")
 
-freq.method
+freq.method.re
+
+
+
+##################################
+##################################
+
+# reporting reffited model
+
+#################################
+#################################
+
+#########
+# boxplot 
+s <- svgstring(width = 7,
+               height = 5)
+
+boxplot.re
+
+svg.string.plot <- s()
+
+cat(svg.string.plot, file = "lmer_output/web_freq_method_boxplot_mturk_re.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/web_freq_method_boxplot_mturk_re.txt")
+
+dev.off()
+
+
+ggsave('accuracy-charts/web_freq_method_boxplot_mturk_re.png', width = 8, height = 4)
+
+################
+#  model summary
+
+tab_model(m3, file = "lmer_output/lmer_summary_method_ranking_mturk_re.html")
+tab_model(m3, file = "../../emotions_dashboard/data/lmer_summary_method_ranking_mturk_re.html")
+
+#######
+# Anova
+## Type III anova table with p-values for F-tests based on Satterthwaite's method
+
+aov <- anova(m3)
+
+aov.apa.re <- kable(aov, digits = 3, format = "html", caption = "ANOVA table for LMER coefficients")
+cat(aov.apa.re, file = "lmer_output/anova_lmer_method_ranking_mturk_re.html")
+cat(aov.apa.re, file = "../../emotions_dashboard/data/anova_lmer_method_ranking_mturk_re.html")
+
+
+###################
+# main effect chart
+
+# # Mean + std error of the mean 
+
+
+s <- svgstring(width = 7,
+               height = 5)
+
+freq.method.re
+
+svg.string.plot <- s()
+
+cat(svg.string.plot, file = "lmer_output/web_freq_method_mturk_re.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/web_freq_method_mturk_re.txt")
+
+dev.off()
+
+
+ggsave('accuracy-charts/web_freq_method_mturk_re.png', width = 8, height = 4)
+
+
+qqmath(m1, id=0.05) #id: identifies values that may be exerting undue influence on the model (i.e. outliers)
+
+qqmath(m3, id=0.05) #id: identifies values that may be exerting undue influence on the model (i.e. outliers)
+
 

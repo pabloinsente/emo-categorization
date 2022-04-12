@@ -394,6 +394,7 @@ print(CutOff)
 
 s <- svgstring(width = 7,
                height = 5)
+
 # dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = "internal")
 dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = CutOff)
 svg.string.plot <- s()
@@ -475,7 +476,6 @@ CutOffLeverageParticipants
 s <- svgstring(width = 7,
                height = 5)
 
-# dotplot_diag(infl.classes$leverage.overall, name = "leverage", cutoff = "internal")
 dotplot_diag(infl.classes$leverage.overall, name = "leverage", cutoff = CutOffLeverageParticipants)
 
 svg.string.plot <- s()
