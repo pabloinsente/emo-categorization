@@ -5,7 +5,8 @@ library(rstatix)
 library(sjPlot)
 library(knitr)
 library(equatiomatic)
-
+library(ggforce)
+library(papaja)
 
 #####################
 # read in data
@@ -62,7 +63,8 @@ df2 %>%
 boxplot <- ggplot(df2, aes(x = method, y = web.frequency, color=method)) + 
   geom_boxplot() +
   geom_point() +
-  guides(color="none")
+  guides(color="none") + 
+  theme_apa()
 
 boxplot
 
@@ -178,7 +180,8 @@ freq.method <- ggplot(method.table, aes(x=method, y=web.frequency.mean, color=me
                       geom_errorbar(aes(ymin=web.frequency.mean-se, ymax=web.frequency.mean+se), width=.1) +
                       geom_point() +
                       labs (title= "Mean and SEM web frequency by survey method") +
-                      guides(color="none")
+                      guides(color="none") + 
+                      theme_apa()
 
 freq.method
 
@@ -289,14 +292,14 @@ infl <- hlm_influence(m1, level = 1)
 # IQR = as.numeric(format(IQR(infl$cooksd)*3, scientific = F))
 CutOff = 4/nrow(infl)
 print(CutOff)
-dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = CutOff)
+dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = CutOff) + theme_apa()
 
 
 s <- svgstring(width = 7,
                height = 5)
 
 # dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = "internal")
-dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = CutOff)
+dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = CutOff) + theme_apa()
 svg.string.plot <- s()
 cat(svg.string.plot, file = "lmer_output/influence_datapoints_lmer_method_mturk .txt")
 cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_datapoints_lmer_method_mturk.txt")
@@ -321,13 +324,13 @@ infl.classes <- hlm_influence(m1, level = "photoID")
 CutOffGroup = 4/21
 
 
-dotplot_diag(infl.classes$cooksd, name = "cooks.distance", cutoff = "internal", modify = "dotplot")
+dotplot_diag(infl.classes$cooksd, name = "cooks.distance", cutoff = "internal", modify = "dotplot") + theme_apa()
 
 
 s <- svgstring(width = 7,
                height = 5)
 
-dotplot_diag(infl.classes$cooksd, name = "cooks.distance", cutoff = "internal", modify = "dotplot")
+dotplot_diag(infl.classes$cooksd, name = "cooks.distance", cutoff = "internal", modify = "dotplot") + theme_apa()
 
 svg.string.plot <- s()
 
@@ -356,14 +359,14 @@ high_cooksd_participants # none
 CutOffLeverage = mean(infl$leverage.overall)*3
 CutOffLeverage
 
-dotplot_diag(infl$leverage.overall, name = "leverage", cutoff = CutOffLeverage)
+dotplot_diag(infl$leverage.overall, name = "leverage", cutoff = CutOffLeverage) + theme_apa()
 
 
 s <- svgstring(width = 7,
                height = 5)
 
 # dotplot_diag(infl$leverage.overall, name = "leverage", cutoff = "internal")
-dotplot_diag(infl$leverage.overall, name = "leverage", cutoff = CutOffLeverage)
+dotplot_diag(infl$leverage.overall, name = "leverage", cutoff = CutOffLeverage) + theme_apa()
 
 svg.string.plot <- s()
 cat(svg.string.plot, file = "lmer_output/leverage_datapoints_lmer_method_mturk.txt")
@@ -388,13 +391,13 @@ high_leverage$id
 CutOffLeverageParticipants = mean(infl.classes$leverage.overall)*3
 CutOffLeverageParticipants
 
-dotplot_diag(infl.classes$leverage.overall, name = "leverage", cutoff = CutOffLeverageParticipants)
+dotplot_diag(infl.classes$leverage.overall, name = "leverage", cutoff = CutOffLeverageParticipants) + theme_apa()
 
 
 s <- svgstring(width = 7,
                height = 5)
 
-dotplot_diag(infl.classes$leverage.overall, name = "leverage", cutoff = CutOffLeverageParticipants)
+dotplot_diag(infl.classes$leverage.overall, name = "leverage", cutoff = CutOffLeverageParticipants) + theme_apa()
 
 svg.string.plot <- s()
 cat(svg.string.plot, file = "lmer_output/leverage_participants_lmer_method_mturk.txt")
@@ -438,7 +441,8 @@ df.filtered %>%
 boxplot.re <- ggplot(df.filtered, aes(x = method, y = web.frequency, color=method)) + 
   geom_boxplot() +
   geom_point() +
-  guides(color="none")
+  guides(color="none") + 
+  theme_apa()
 
 boxplot.re
 
@@ -472,7 +476,8 @@ freq.method.re <- ggplot(method.table.re, aes(x=method, y=web.frequency.mean, co
   geom_errorbar(aes(ymin=web.frequency.mean-se, ymax=web.frequency.mean+se), width=.1) +
   geom_point() +
   labs (title= "Mean and SEM web frequency by survey method") +
-  guides(color="none")
+  guides(color="none") + 
+  theme_apa()
 
 freq.method.re
 

@@ -1,7 +1,8 @@
 library(tidyverse)
 library(ordinal)
-library("RColorBrewer")
-
+library(RColorBrewer)
+library(ggforce)
+library(papaja)
 
 # df_students = read_csv("../clean_data/forced_choice_emotion_uw_students_long_format_lmer.csv")
 df_mturk_en = read_csv("../clean_data_mturk/forced_choice_emotion_mturk_long_format_lmer.csv")
@@ -102,7 +103,7 @@ three_Way <- df %>% mutate(emotionF = ordered(emotionF, levels=rev(levels(emotio
                     facet_grid(sexF~ethnicityF) +
                     labs(y = "proportion", x = "survey language", fill ="emotion") + 
                     scale_fill_manual(values = RdBu8Alter) + 
-                    theme_minimal()
+                    theme_apa()
 three_Way
 
 s <- svgstring(width = 7,
@@ -193,7 +194,7 @@ two_way_sex_language <- df %>% mutate(emotionF = ordered(emotionF, levels=rev(le
                                facet_grid(. ~conditionF) + 
                                labs(y = "proportion", x = "sex", fill ="emotion") + 
                                scale_fill_manual(values = RdBu8Alter) + 
-                               theme_minimal()
+                               theme_apa()
 
 
 two_way_sex_language
@@ -216,7 +217,7 @@ two_way_sex_ethnicity <- df %>% mutate(emotionF = ordered(emotionF, levels=rev(l
                             facet_grid(. ~ethnicityF) + 
                             labs(y = "proportion", x = "sex", fill ="emotion") + 
                             scale_fill_manual(values = RdBu8Alter) + 
-                            theme_minimal()
+                            theme_apa()
 
 two_way_sex_ethnicity
 
@@ -238,7 +239,7 @@ two_way_ethnicity_condition <- df %>% mutate(emotionF = ordered(emotionF, levels
   facet_grid(. ~conditionF) + 
   labs(y = "proportion", x = "ethnicity", fill ="emotion") + 
   scale_fill_manual(values = RdBu8Alter) + 
-  theme_minimal()
+  theme_apa()
 
 two_way_ethnicity_condition
 
@@ -259,7 +260,7 @@ condition_chart <- df %>% mutate(emotionF = ordered(emotionF, levels=rev(levels(
                           geom_bar(position = "fill") +
                           labs(y = "proportion", x = "survey language", fill ="emotion") + 
                           scale_fill_manual(values = RdBu8Alter) + 
-                          theme_minimal()
+                          theme_apa()
 
 condition_chart
 
@@ -279,7 +280,7 @@ sex_chart <- df %>% mutate(emotionF = ordered(emotionF, levels=rev(levels(emotio
   geom_bar(position = "fill") +
   labs(y = "proportion", x = "sex", fill ="emotion") + 
   scale_fill_manual(values = RdBu8Alter) + 
-  theme_minimal()
+  theme_apa()
 
 sex_chart
 
@@ -300,7 +301,7 @@ et_chart <- df %>% mutate(emotionF = ordered(emotionF, levels=rev(levels(emotion
   geom_bar(position = "fill") +
   labs(y = "proportion", x = "ethnicity", fill ="emotion") + 
   scale_fill_manual(values = RdBu8Alter) + 
-  theme_minimal()
+  theme_apa()
 
 et_chart
 

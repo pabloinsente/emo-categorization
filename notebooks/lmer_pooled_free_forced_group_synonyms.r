@@ -1,6 +1,9 @@
 library(tidyverse)
 library(svglite)
 library(equatiomatic)
+library(ggforce)
+library(papaja)
+library(rstatix)
 library(rjson)
 
 df.free = read_csv("../clean_data/free_labeling_emotion_uw_students_long_format_lmer.csv")
@@ -309,7 +312,7 @@ correct.survey.plot <- ggplot(correct.survey, aes(x=condition, y=correct)) +
                 position=position_dodge(.9)) +
   labs(x = "survey condition",
        title = "Correct responses grouped by Wordnet synonyms") + 
-  theme(plot.title = element_text(size=9))
+  theme_apa()
 
 
 correct.survey.plot
@@ -346,7 +349,7 @@ correct.label.plot <- ggplot(correct.label, aes(x = reorder(label, -correct), y=
                 position=position_dodge(.9)) +
   labs(x = "expected emotion label",
        title = "Correct responses grouped by Wordnet synonyms") + 
-  theme(plot.title = element_text(size=9))
+  theme_apa()
 
 
 correct.label.plot
@@ -387,7 +390,7 @@ correct.survey.label.plot <- ggplot(correct.survey.label, aes(x = reorder(label,
                 position=position_dodge(.9)) +
   labs(x = "expected emotion label",
        title = "Correct responses grouped by Wordnet synonyms") + 
-  theme(plot.title = element_text(size=9))
+  theme_apa()
 
 correct.survey.label.plot
 
@@ -408,18 +411,4 @@ dev.off()
 ggsave('accuracy-charts/correct-label-survey.png', width = 8, height = 4)
 
 
-# ###################
-# diagnostics
-# ###################
-
-# influence 
-
-# m1 <- glmer(correct ~ 1 + condition.dummy + (1 | participantIdF) +  (1 | photoIdF),
-#             
-# 
-# 
-# groups = c("participantIdF", "photoIdF")
-# 
-# inf_gm1 <- influence(m1, groups, maxfun=100)
-# inf_gm2 <- influence(m1, "participantIdF", maxfun=100)
 

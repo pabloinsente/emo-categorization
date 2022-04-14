@@ -1,6 +1,10 @@
 library(tidyverse)
 library(svglite)
 library(equatiomatic)
+library(ggforce)
+library(papaja)
+library(rstatix)
+library(rjson)
 
 df.free = read_csv("../clean_data_mturk/free_labeling_emotion_mturk_long_format_lmer.csv")
 df.forced = read_csv("../clean_data_mturk/forced_choice_emotion_mturk_long_format_lmer.csv")
@@ -307,7 +311,7 @@ correct.survey.plot <- ggplot(correct.survey, aes(x=condition, y=correct)) +
                 position=position_dodge(.9)) +
   labs(x = "survey condition",
        title = "Correct responses grouped by Wordnet synonyms") + 
-  theme(plot.title = element_text(size=9))
+  theme_apa()
 
 
 correct.survey.plot
@@ -345,7 +349,7 @@ correct.label.plot <- ggplot(correct.label, aes(x = reorder(label, -correct), y=
                 position=position_dodge(.9)) +
   labs(x = "expected emotion label",
        title = "Correct responses grouped by Wordnet synonyms") + 
-  theme(plot.title = element_text(size=9))
+  theme_apa()
 
 
 correct.label.plot
@@ -385,7 +389,7 @@ correct.survey.label.plot <- ggplot(correct.survey.label, aes(x = reorder(label,
                 position=position_dodge(.9)) +
   labs(x = "expected emotion label",
        title = "Correct responses grouped by Wordnet synonyms") + 
-  theme(plot.title = element_text(size=9))
+  theme_apa()
 
 correct.survey.label.plot
 

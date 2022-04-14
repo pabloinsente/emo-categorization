@@ -1,6 +1,8 @@
 library(tidyverse)
 library(ordinal)
-library("RColorBrewer")
+library(RColorBrewer)
+library(ggforce)
+library(papaja)
 
 df_students = read_csv("../clean_data/forced_choice_emotion_uw_students_long_format_lmer.csv")
 
@@ -66,7 +68,7 @@ two_way_sex_ethnicity <- df %>%
   facet_grid(. ~ethnicityF) + 
   labs(y = "proportion", x = "sex", fill ="emotion") + 
   scale_fill_manual(values = RdBu8Alter) + 
-  theme_minimal()
+  theme_apa()
 
 two_way_sex_ethnicity
 
@@ -90,7 +92,7 @@ sex_chart <- df %>%
   geom_bar(position = "fill") +
   labs(y = "proportion", x = "sex", fill ="emotion") + 
   scale_fill_manual(values = RdBu8Alter) + 
-  theme_minimal()
+  theme_apa()
 
 sex_chart
 
@@ -113,7 +115,7 @@ et_chart <- df %>%
   geom_bar(position = "fill") +
   labs(y = "proportion", x = "ethnicity", fill ="emotion") + 
   scale_fill_manual(values = RdBu8Alter) + 
-  theme_minimal()
+  theme_apa()
 
 
 et_chart

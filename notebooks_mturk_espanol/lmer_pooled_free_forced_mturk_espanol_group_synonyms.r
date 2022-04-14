@@ -1,7 +1,10 @@
 library(tidyverse)
-library(plyr)
 library(svglite)
 library(equatiomatic)
+library(ggforce)
+library(papaja)
+library(rstatix)
+library(rjson)
 
 df.free = read_csv("../clean_data_mturk_espanol/free_labeling_emotion_mturk_long_format_lmer_espanol.csv")
 df.forced = read_csv("../clean_data_mturk_espanol/forced_choice_emotion_mturk_long_format_lmer_espanol.csv")
@@ -322,7 +325,7 @@ correct.survey.plot <- ggplot(correct.survey, aes(x=condition, y=correct)) +
                 position=position_dodge(.9)) +
   labs(x = "survey condition",
        title = "Correct responses grouped by Wordnet synonyms") + 
-  theme(plot.title = element_text(size=9))
+  theme_apa()
 
 
 
@@ -360,7 +363,7 @@ correct.label.plot <- ggplot(correct.label, aes(x = reorder(label, -correct), y=
                 position=position_dodge(.9))+
   labs(x = "expected emotion label",
        title = "Correct responses grouped by Wordnet synonyms") + 
-  theme(plot.title = element_text(size=9))
+  theme_apa()
 
 
 correct.label.plot
@@ -400,7 +403,7 @@ correct.survey.label.plot <- ggplot(correct.survey.label, aes(x = reorder(label,
                 position=position_dodge(.9))+
   labs(x = "expected emotion label",
        title = "Correct responses grouped by Wordnet synonyms") + 
-  theme(plot.title = element_text(size=9))
+  theme_apa()
 
 correct.survey.label.plot
 
@@ -420,69 +423,4 @@ dev.off()
 ggsave('accuracy-charts/correct-label-survey.png', width = 8, height = 4)
 
 
-# ####################################
-# # LMER adding ethnicity as covariate
-# ####################################
-# 
-# ## dummy coded predictor
-# m3 <- glmer(correct ~ 1 + condition.center * ethnicityC + (1 + ethnicityC| participantIdF) +(1 | photoIdF),
-#             data = df,
-#             family = binomial) 
-# 
-# summary(m3)
-# 
-# fix.effect = -3.376
-# ## odd ratio
-# exp(fix.effect) # 0.03415317
-# ## probability
-# plogis(fix.effect) # 0.03302525
-# 
-# 
-# #################
-# ## interpretation
-# 
-# # participants in the free-response format are expected to have b=-3.37626 lower log odds of "correctly" 
-# # answering the expected emotion label, p < 0.001, holding constant the random-effects 
-# # for participantId and photoId, and fixed-effect for ethnicity
-# #
-# # Or, the probability of correctly answering in the free-response condition is only 3%, holding
-# # constant the random-effects for participantId and photoId, and fixed-effect for ethnicity
-# 
-# plot_model(m3, show.values = TRUE, value.offset = .3)
-# plot_model(m3, type = "pred", terms = c("condition.center", "ethnicityC"))
-# 
-# 
-# ####################################
-# # LMER adding sex as covariate
-# ####################################
-# 
-# ## dummy coded predictor
-# m4 <- glmer(correct ~ 1 + condition.center * sexC + (1 + sexC| participantIdF) +(1 | photoIdF),
-#             data = df,
-#             family = binomial) 
-# 
-# summary(m4)
-# 
-# fix.effect = -3.378
-# ## odd ratio
-# exp(fix.effect) # 0.0341
-# ## probability
-# plogis(fix.effect) # 0.0330
-# 
-# 
-# #################
-# ## interpretation
-# 
-# # participants in the free-response format are expected to have b=-3.3782 lower log odds of "correctly" 
-# # answering the expected emotion label, p < 0.001, holding constant the random-effects 
-# # for participantId and photoId, and fixed-effect for sex
-# #
-# # Or, the probability of correctly answering in the free-response condition is only 3%, holding
-# # constant the random-effects for participantId and photoId, and fixed-effect for sex
-# 
-# plot_model(m4, show.values = TRUE, value.offset = .3)
-# plot_model(m4, type = "pred", terms = c("condition.center", "sexC"))
-# 
-# 
-# 
-# 
+

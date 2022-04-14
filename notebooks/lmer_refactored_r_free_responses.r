@@ -386,6 +386,9 @@ dev.off()
 #####################################
 #####################################
 
+invisible(utils::memory.limit(64000))
+
+
 infl <- hlm_influence(m2, level = 1)
 
 # IQR = as.numeric(format(IQR(infl$cooksd)*3, scientific = F))
