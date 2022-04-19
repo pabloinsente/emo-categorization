@@ -188,6 +188,10 @@ df <- rbind(df.forced, df.free)
 df$participantIdF <- as.factor(df$participantId)
 df$photoIdF <- as.factor(df$photoId)
 
+
+# save for pooling with espanol sample
+write_csv(df, "../clean_data_mturk/accuracy_grouped_mturk.csv")
+
 ####################
 # LMER
 ####################

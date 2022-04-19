@@ -19,6 +19,9 @@ library(webshot)
 library(equatiomatic)
 library(svglite)
 library(knitr)
+library(ggforce)
+library(papaja)
+
 
 df = read_csv("../clean_data/free_labeling_emotion_uw_students_long_format_lmer.csv")
 
@@ -240,7 +243,7 @@ p = ggplot(df,aes(sex,sentimentScore,color=ethnicity,group=ethnicity))+
     geom_smooth(method="lm",se=F)+
     facet_wrap(~participantId)+
     theme_bw()+
-    scale_color_manual(values=c("#1f77b4", "#ff7f0e"))
+    scale_color_manual(values=c("#1f77b4", "#ff7f0e")) + theme_apa()
 
 p
 svg.string.plot <- s()
@@ -302,7 +305,7 @@ ggplot(data = resid1, aes(x = participantId, y = .std.ls.resid)) +
   geom_point(alpha = 0.2) +
   geom_smooth(method = "loess", se = FALSE) + 
   labs(y = "Least-Squares level-1 residuals", 
-       title = "Least-Squares residuals by participant ID")
+       title = "Least-Squares residuals by participant ID") + theme_apa()
 
 l1.res <- s()
 cat(l1.res , file = "lmer_output/l1_res_plot_free_uw_students.txt")
@@ -320,7 +323,7 @@ ggplot(data = resid2, aes(x = participantId, y = .std.ranef.intercept)) +
   geom_point(alpha = 0.4) +
   geom_smooth(method = "loess", se = FALSE) + 
   labs(y = "Random effects - intercept", 
-       title = "Intercept random effects against participant ID")
+       title = "Intercept random effects against participant ID") + theme_apa()
 
 l2.res.int <- s()
 cat(l2.res.int , file = "lmer_output/l2_int_res_plot_free_uw_students.txt")
@@ -399,7 +402,7 @@ s <- svgstring(width = 7,
                height = 5)
 
 # dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = "internal")
-dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = CutOff)
+dotplot_diag(infl$cooksd, name = "cooks.distance", cutoff = CutOff) + theme_apa()
 svg.string.plot <- s()
 cat(svg.string.plot, file = "lmer_output/influence_datapoints_lmer_free_uw_students.txt")
 cat(svg.string.plot, file = "../../emotions_dashboard/data/influence_datapoints_lmer_free_uw_students.txt")
@@ -425,8 +428,7 @@ CutOffGroup
 s <- svgstring(width = 7,
                height = 5)
 
-# dotplot_diag(infl.classes$cooksd, name = "cooks.distance", cutoff = "internal", modify = "dotplot")
-dotplot_diag(infl.classes$cooksd, name = "cooks.distance", cutoff = CutOffGroup, modify = "dotplot")
+dotplot_diag(infl.classes$cooksd, name = "cooks.distance", cutoff = CutOffGroup, modify = "dotplot") + theme_apa()
 svg.string.plot <- s()
 
 cat(svg.string.plot, file = "lmer_output/influence_participants_lmer_free_uw_students.txt")
@@ -455,8 +457,7 @@ CutOffLeverage
 s <- svgstring(width = 7,
                height = 5)
 
-# dotplot_diag(infl$leverage.overall, name = "leverage", cutoff = "internal")
-dotplot_diag(infl$leverage.overall, name = "leverage", cutoff = CutOffLeverage)
+dotplot_diag(infl$leverage.overall, name = "leverage", cutoff = CutOffLeverage) + theme_apa()
 
 svg.string.plot <- s()
 cat(svg.string.plot, file = "lmer_output/leverage_datapoints_lmer_free_uw_students.txt")
@@ -479,7 +480,7 @@ CutOffLeverageParticipants
 s <- svgstring(width = 7,
                height = 5)
 
-dotplot_diag(infl.classes$leverage.overall, name = "leverage", cutoff = CutOffLeverageParticipants)
+dotplot_diag(infl.classes$leverage.overall, name = "leverage", cutoff = CutOffLeverageParticipants) + theme_apa()
 
 svg.string.plot <- s()
 cat(svg.string.plot, file = "lmer_output/leverage_participants_lmer_free_uw_students.txt")
@@ -697,7 +698,7 @@ sex.ethnicity.sum.table
 ggplot(sex.sum.table, aes(y=sentimentScore, x=sex, colour=sex)) + 
   geom_errorbar(aes(ymin=sentimentScore-se, ymax=sentimentScore+se), width=.1) +
   geom_point() + 
-  labs (title= "Mean and SEM sentiment score by sex")
+  labs (title= "Mean and SEM sentiment score by sex") + theme_apa()
 
 s <- svgstring(width = 7,
                height = 5)
@@ -705,7 +706,7 @@ s <- svgstring(width = 7,
 ggplot(sex.sum.table, aes(y=sentimentScore, x=sex, colour=sex)) + 
   geom_errorbar(aes(ymin=sentimentScore-se, ymax=sentimentScore+se), width=.1) +
   geom_point() + 
-  labs (title= "Mean and SEM sentiment score by sex")
+  labs (title= "Mean and SEM sentiment score by sex") + theme_apa()
 
 chart <- s()
 cat(chart , file = "lmer_output/sex_effect_free.txt")
@@ -719,7 +720,7 @@ dev.off()
 ggplot(ethnicity.sum.table, aes(y=sentimentScore, x=ethnicity, colour=ethnicity)) + 
   geom_errorbar(aes(ymin=sentimentScore-se, ymax=sentimentScore+se), width=.1) +
   geom_point() + 
-  labs (title= "Mean and SEM sentiment score by ethnicity")
+  labs (title= "Mean and SEM sentiment score by ethnicity") + theme_apa()
 
 s <- svgstring(width = 7,
                height = 5)
@@ -727,7 +728,7 @@ s <- svgstring(width = 7,
 ggplot(ethnicity.sum.table, aes(y=sentimentScore, x=ethnicity, colour=ethnicity)) + 
   geom_errorbar(aes(ymin=sentimentScore-se, ymax=sentimentScore+se), width=.1) +
   geom_point() + 
-  labs (title= "Mean and SEM sentiment score by ethnicity")
+  labs (title= "Mean and SEM sentiment score by ethnicity") + theme_apa()
 
 chart <- s()
 cat(chart , file = "lmer_output/ethnicity_effect_free.txt")
@@ -742,7 +743,7 @@ dev.off()
 ggplot(sex.ethnicity.sum.table, aes(x=ethnicity, y=sentimentScore, fill=sex, color=sex)) +
   geom_errorbar(aes(ymin=sentimentScore-se, ymax=sentimentScore+se), width=.1) +
   geom_point() + 
-  labs (title= "Mean and SEM sentiment score by sex and ethnicity ")
+  labs (title= "Mean and SEM sentiment score by sex and ethnicity ") + theme_apa()
 
 
 s <- svgstring(width = 7,
@@ -751,9 +752,10 @@ s <- svgstring(width = 7,
 ggplot(sex.ethnicity.sum.table, aes(x=ethnicity, y=sentimentScore, fill=sex, color=sex)) +
   geom_errorbar(aes(ymin=sentimentScore-se, ymax=sentimentScore+se), width=.1) +
   geom_point() + 
-  labs (title= "Mean and SEM sentiment score by sex and ethnicity ")
+  labs (title= "Mean and SEM sentiment score by sex and ethnicity ") + theme_apa()
 
 chart <- s()
 cat(chart , file = "lmer_output/sex_et_effect_free.txt")
 cat(chart , file = "../../emotions_dashboard/data/sex_et_effect_free.txt")
 dev.off()
+

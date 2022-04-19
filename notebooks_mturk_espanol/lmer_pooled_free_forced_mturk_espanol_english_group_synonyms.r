@@ -174,14 +174,6 @@ df.free$condition.center <- -.5
 
 head(df.free)
 
-
-###################
-# Comparison 
-###################
-
-mean(df.forced$correct) # 70
-mean(df.free$correct) # 32
-
 ##################
 # join dataframes for lmer
 ##################
@@ -203,6 +195,54 @@ df <- rbind(df.forced, df.free)
 df$participantIdF <- as.factor(df$participantId)
 df$photoIdF <- as.factor(df$photoId)
 
+######################
+# join datasets
+######################
+
+# read in english sample
+df.english = read_csv("../clean_data_mturk/accuracy_grouped_mturk.csv")
+
+head(df)
+head(df.english)
+
+## add between subjects predictor 
+df$language.condition <- "espanol"
+df$language.condition.dummy <- 1
+df$language.condition.center <- .5
+
+## add between subjects predictor 
+df.english$language.condition <- "english"
+df.english$language.condition.dummy <- 0
+df.english$language.condition.center <- -.5
+
+# to avoid id duplication
+df.english$participantId <- df.english$participantId + 1000 
+
+df.pool <- rbind(df, df.english)
+
+df.pool
+
+###################
+# Comparison 
+###################
+library(crosstable)
+library(apaTables)
+
+
+mean(df$correct) # 0.4634329
+mean(df.english$correct) # 0.3802117
+
+
+crosstable(df.pool, c(condition, language.condition), by=correct,  total="both") %>%
+  as_flextable() 
+
+apa.2way.table(iv1=condition,
+               iv2=language.condition,
+               dv=correct,
+               data=df.pool,
+               landscape=TRUE, 
+               filename="two_way_table.doc")
+
 ####################
 # LMER
 ####################
@@ -213,39 +253,65 @@ library(lme4)
 # - repeated measures for participantId
 # - repeated measures for photId
 
+
+########################
 ## dummy coded predictor
-m1 <- glmer(correct ~ 1 + condition.dummy + (1 | participantIdF) +  (1 | photoIdF),
-            data = df,
+# 
+# df.pool$condition.dummy <- to_factor(df.pool$condition.dummy)
+# df.pool$language.condition.dummy <- to_factor(df.pool$language.condition.dummy)
+
+m1 <- glmer(correct ~ 1 + condition.dummy*language.condition.dummy + (1 | participantIdF) +  (1 | photoIdF),
+            data = df.pool,
             family = binomial) 
 
 summary(m1)
 
-fix.effect = -1.95
+##########
+## free vs forced condition
+fix.effect = 1.57017
 ## odd ratio
-exp(fix.effect) # 0.142
+exp(fix.effect) # 4.807465
 ## probability
-plogis(fix.effect) # 0.12
+plogis(fix.effect) # 0.8278078
 
+
+##########
+## free vs forced condition
+fix.effect = 0.30117
+## odd ratio
+exp(fix.effect) # 1.351439
+## probability
+plogis(fix.effect) # 0.5747285
+
+
+##########
+## free vs forced condition
+fix.effect = 0.33788
+## odd ratio
+exp(fix.effect) # 1.401972
+## probability
+plogis(fix.effect) # 0.5836755
+
+
+#######################
 ## centered  predictor
-m2 <- glmer(correct ~ 1 + condition.center + (1 | participantIdF)  + (1 | photoIdF),
-            data = df,
+
+# df.pool$condition.center <- to_factor(df.pool$condition.center)
+# df.pool$language.condition.center <- to_factor(df.pool$language.condition.center)
+
+
+m2 <- glmer(correct ~ 1 + condition.center*language.condition.center + (1 | participantIdF)  + (1 | photoIdF),
+            data = df.pool,
             family = binomial) 
 
 summary(m2)
 
-fix.effect = -1.95
-## odd ratio
-exp(fix.effect) # 0.142
-## probability
-plogis(fix.effect) # 0.12
-
-
 
 ### get mathematical formula
-formula_lmer <- extract_eq(m1)
-
-cat(formula_lmer, file = "lmer_output/formula_log_lmer_mturk_espanol.txt")
-cat(formula_lmer, file = "../../emotions_dashboard/data/formula_log_lmer_mturk_espanol.txt")
+# formula_lmer <- extract_eq(m2)
+# 
+# cat(formula_lmer, file = "lmer_output/formula_log_lmer_mturk_espanol_english.txt")
+# cat(formula_lmer, file = "../../emotions_dashboard/data/formula_log_lmer_mturk_espanol_english.txt")
 
 
 
@@ -259,47 +325,95 @@ cat(formula_lmer, file = "../../emotions_dashboard/data/formula_log_lmer_mturk_e
 ###################
 library(sjPlot)
 library(sjlabelled)
-library(sjmisc)
+library(papaja)
 library(ggplot2)
 
-plot_model(m1)
-plot_model(m1, vline.color = "red")
-plot_model(m1, transform = "plogis", show.values = TRUE, value.offset = .3)
-plot_model(m1, show.values = TRUE, value.offset = .3)
-plot_model(m1, type = "pred", terms = "condition.dummy")
-plot_model(m1, type = "emm", terms = "condition.dummy")
 
-tab_model(m1)
-tab_model(m2)
+# odds ratio dots
+odds.plot <- plot_model(m2, vline.color = "red", show.values = TRUE, value.offset = .3) +
+  theme_apa()
+odds.plot
 
+###########################
+######## Centerd predictors
 
+# main effect of language
+lang.main <- plot_model(m2, type = "eff", terms = c("language.condition.center")) +
+  labs(x = "language condition") + 
+  theme_apa()
+
+lang.main
+
+# main effect of survey method
+survey.main <- plot_model(m2, type = "eff", terms = c("condition.center")) +
+  labs(x = "survey method", color="") + 
+  theme_apa()
+survey.main
+
+# interaction effect language X survey method
+inter.effect <- plot_model(m2, type = "eff", terms = c("language.condition.center", "condition.center")) +
+  labs(x = "language condition", color="survey method") + 
+  theme_apa()
+inter.effect
+
+##########################
+# save plots for reporting
+
+# Odds ratio plot
 s <- svgstring(width = 7,
                height = 5)
-
-plot_model(m1, type = "pred", terms = "condition.dummy")
-
+odds.plot
 svg.string.plot <- s()
-
-cat(svg.string.plot, file = "lmer_output/predicted_prob_mturk_espanol.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/predicted_prob_mturk_espanol.txt")
-
+cat(svg.string.plot, file = "lmer_output/predicted_odds_mturk_espanol_english.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/predicted_odds_mturk_espanol_english.txt")
 dev.off()
 
-tab_model(m1)
-tab_model(m1,transform =  "plogis")
+
+# Language main effect
+s <- svgstring(width = 7,
+               height = 5)
+lang.main
+svg.string.plot <- s()
+cat(svg.string.plot, file = "lmer_output/lang_predicted_prob_mturk_espanol_english.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/lang_predicted_prob_mturk_espanol_english.txt")
+dev.off()
+
+# survey method main effect
+s <- svgstring(width = 7,
+               height = 5)
+survey.main
+svg.string.plot <- s()
+cat(svg.string.plot, file = "lmer_output/survey_predicted_prob_mturk_espanol_english.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/survey_predicted_prob_mturk_espanol_english.txt")
+dev.off()
+
+# language X survey method interaction effect
+s <- svgstring(width = 7,
+               height = 5)
+inter.effect
+svg.string.plot <- s()
+cat(svg.string.plot, file = "lmer_output/interaction_predicted_prob_mturk_espanol_english.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/interaction_predicted_prob_mturk_espanol_english.txt")
+dev.off()
+
 
 
 ### get coefficient table for reporting
-
 # odds ratio
-tab_model(m1, file = "lmer_output/lmer_summary_odds_free_vs_forced_mturk_espanol.html")
-tab_model(m1, file = "../../emotions_dashboard/data/lmer_summary_odds_free_vs_forced_mturk_espanol.html")
 
+tab_model(m2, 
+          pred.labels = c("Intercept",
+                  "Survey condition [.5 = forced-choice]",
+                  "Language condition [.5 = espanol]",
+                  "Interaction survey and language conditions"),
+          file = "lmer_output/lmer_summary_odds_free_vs_forced_mturk_espanol_enlish.html")
 
-# probabilities
-tab_model(m1, transform =  "plogis", file = "lmer_output/lmer_summary_free_vs_forced_mturk_espanol.html")
-tab_model(m1, transform =  "plogis", file = "../../emotions_dashboard/data/lmer_summary_free_vs_forced_mturk_espanol.html")
-
+tab_model(m2, 
+          pred.labels = c("Intercept",
+                          "Survey condition [.5 = forced-choice]",
+                          "Language condition [.5 = espanol]",
+                          "Interaction survey and language conditions"),
+          file = "../../emotions_dashboard/data/lmer_summary_odds_free_vs_forced_mturk_espanol_enlish.html")
 
 
 ######################
@@ -312,7 +426,7 @@ library(rstatix)
 # correct by survey method
 
 
-correct.survey <- df %>%
+correct.survey <- df.pool %>%
   group_by(condition) %>%
   get_summary_stats(correct, type = "mean_se")
 
@@ -326,7 +440,7 @@ correct.survey.plot <- ggplot(correct.survey, aes(x=condition, y=correct)) +
                 width=.2,                    # Width of the error bars
                 position=position_dodge(.9)) +
   labs(x = "survey condition",
-       title = "Correct responses grouped by Wordnet synonyms") + 
+       title = "Correct responses grouped by Wordnet synonyms (pooled surveys)") + 
   theme_apa()
 
 
@@ -340,25 +454,67 @@ correct.survey.plot
 
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/correct-survey_mturk_espanol.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-survey_mturk_espanol.txt")
+cat(svg.string.plot, file = "lmer_output/correct_survey_mturk_espanol_english.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/correct_survey_mturk_espanol_english.txt")
 
 dev.off()
 
 
-ggsave('accuracy-charts/correct-survey.png', width = 4, height = 4)
+ggsave('accuracy-charts/correct-survey-es-eng.png', width = 4, height = 4)
+
 
 ###############
-# correct by emotion
+# correct by language condition 
 
-correct.label <- df %>%
-  group_by(label) %>%  get_summary_stats(correct, type = "mean_se")
 
-correct.label
+correct.lang<- df.pool %>%
+  group_by(language.condition) %>%
+  get_summary_stats(correct, type = "mean_se")
 
-names(correct.label)[4] <- "correct"
+correct.lang
 
-correct.label.plot <- ggplot(correct.label, aes(x = reorder(label, -correct), y=correct)) + 
+names(correct.lang)[4] <- "correct"
+
+correct.lang.plot <- ggplot(correct.lang, aes(x=language.condition, y=correct)) + 
+  geom_bar(position=position_dodge(), stat="identity") +
+  geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
+                width=.2,                    # Width of the error bars
+                position=position_dodge(.9)) +
+  labs(x = "language condition",
+       title = "Correct responses grouped by Wordnet synonyms (pooled surveys)") + 
+  theme_apa()
+
+
+correct.lang.plot
+
+s <- svgstring(width = 7,
+               height = 5)
+
+correct.lang.plot
+
+svg.string.plot <- s()
+
+cat(svg.string.plot, file = "lmer_output/correct_lang_mturk_espanol_english.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/correct_lang_mturk_espanol_english.txt")
+
+dev.off()
+
+
+ggsave('accuracy-charts/correct-survey-lang-es-eng.png', width = 4, height = 4)
+
+
+
+###############
+# correct proportion by language and survey condition
+
+correct.survey.lang <- df.pool %>%
+  group_by(condition, language.condition) %>%  get_summary_stats(correct, type = "mean_se")
+
+correct.survey.lang
+
+names(correct.survey.lang)[5] <- "correct"
+
+correct.survey.lang.plot <- ggplot(correct.survey.lang, aes(x = reorder(language.condition, -correct), y=correct, fill=condition)) + 
   geom_bar(position=position_dodge(), stat="identity") +
   geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
                 width=.2,                    # Width of the error bars
@@ -367,62 +523,21 @@ correct.label.plot <- ggplot(correct.label, aes(x = reorder(label, -correct), y=
        title = "Correct responses grouped by Wordnet synonyms") + 
   theme_apa()
 
-
-correct.label.plot
-
-
-s <- svgstring(width = 7,
-               height = 5)
-
-correct.label.plot
-
-svg.string.plot <- s()
-
-cat(svg.string.plot, file = "lmer_output/correct-label_mturk_espanol.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label_mturk_espanol.txt")
-
-dev.off()
-
-
-ggsave('accuracy-charts/correct-survey-emotion.png', width = 6, height = 4)
-
-
-###############
-# correct proportion by emotion and condition
-
-correct.survey.label <- df %>%
-  group_by(condition, label) %>%  get_summary_stats(correct, type = "mean_se")
-
-correct.survey.label
-
-names(correct.survey.label)[5] <- "correct"
-
-
-correct.survey.label.plot <- ggplot(correct.survey.label, aes(x = reorder(label, -correct), y=correct, fill=condition)) + 
-  geom_bar(position=position_dodge(), stat="identity") +
-  geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
-                width=.2,                    # Width of the error bars
-                position=position_dodge(.9))+
-  labs(x = "expected emotion label",
-       title = "Correct responses grouped by Wordnet synonyms") + 
-  theme_apa()
-
-correct.survey.label.plot
+correct.survey.lang.plot
 
 
 s <- svgstring(width = 7,
                height = 5)
 
-correct.survey.label.plot
+correct.survey.lang.plot
 
 svg.string.plot <- s()
 
-cat(svg.string.plot, file = "lmer_output/correct-label-survey_mturk_espanol.txt")
-cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label-survey_mturk_espanol.txt")
+cat(svg.string.plot, file = "lmer_output/correct_label_survey_lang_mturk_espanol_english.txt")
+cat(svg.string.plot, file = "../../emotions_dashboard/data/correct_label_survey_lang_mturk_espanol_english.txt")
 
 dev.off()
 
-ggsave('accuracy-charts/correct-label-survey.png', width = 8, height = 4)
-
+ggsave('accuracy-charts/correct-lang-survey.png', width = 8, height = 4)
 
 
