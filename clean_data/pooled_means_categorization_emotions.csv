@@ -1,0 +1,31 @@
+﻿study,method,label,mean.correct
+pre.1987.studies,forced,anger,79.1
+college.students,forced,anger,60.1
+college.students,free,anger,22.8
+mturk,forced,anger,54.6
+mturk,free,anger,30.1
+pre.1987.studies,forced,disgust ,81.1
+college.students,forced,disgust ,55.5
+college.students,free,disgust ,16.2
+mturk,forced,disgust ,47.8
+mturk,free,disgust ,23.3
+pre.1987.studies,forced,fear,77.3
+college.students,forced,fear,31.6
+college.students,free,fear,1
+mturk,forced,fear,31.6
+mturk,free,fear,10
+pre.1987.studies,forced,surprise,87.4
+college.students,forced,surprise,57.8
+college.students,free,surprise,15
+mturk,forced,surprise,46.2
+mturk,free,surprise,20.5
+pre.1987.studies,forced,happiness,95.1
+college.students,forced,happiness,85.3
+college.students,free,happiness,46.4
+mturk,forced,happiness,87.7
+mturk,free,happiness,46.7
+pre.1987.studies,forced,sadness,86.5
+college.students,forced,sadness,69.6
+college.students,free,sadness,34.4
+mturk,forced,sadness,66.3
+mturk,free,sadness,35.3

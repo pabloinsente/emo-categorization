@@ -248,23 +248,18 @@ cat(formula_lmer, file = "../../emotions_dashboard/data/formula_log_lmer_uw_stud
 # plots of effects
 ###################
 library(sjPlot)
-library(sjlabelled)
-library(sjmisc)
 library(ggplot2)
+library(papaja)
 
-plot_model(m1)
-plot_model(m1, vline.color = "red")
-plot_model(m1, transform = "plogis", show.values = TRUE, value.offset = .3)
-plot_model(m1, show.values = TRUE, value.offset = .3)
-plot_model(m1, type = "pred", terms = "condition.dummy")
-plot_model(m1, type = "emm", terms = "condition.dummy")
+survey.main <- plot_model(m2, type = "eff", terms = c("condition.center")) +
+  labs(x = "survey method", color="") + 
+  theme_apa()
+survey.main
 
 
 s <- svgstring(width = 7,
                height = 5)
-
-plot_model(m1, type = "pred", terms = "condition.dummy")
-
+survey.main
 svg.string.plot <- s()
 
 cat(svg.string.plot, file = "lmer_output/predicted_prob_uw_students.txt")
@@ -272,19 +267,19 @@ cat(svg.string.plot, file = "../../emotions_dashboard/data/predicted_prob_uw_stu
 
 dev.off()
 
-tab_model(m1)
-tab_model(m1,transform =  "plogis")
-
 
 ### get coefficient table for reporting
 
-## odds ratio
-tab_model(m1, file = "lmer_output/lmer_summary_odds_free_vs_forced_uw_students.html")
-tab_model(m1, file = "../../emotions_dashboard/data/lmer_summary_odds_free_vs_forced_uw_students.html")
+tab_model(m2, 
+          pred.labels = c("Intercept",
+                          "Survey condition [.5 = forced-choice]"),
+          file = "../../emotions_dashboard/data/lmer_summary_odds_free_vs_forced_uw_students.html")
 
-## prob
-tab_model(m1, transform =  "plogis", file = "lmer_output/lmer_summary_free_vs_forced_uw_students.html")
-tab_model(m1, transform =  "plogis", file = "../../emotions_dashboard/data/lmer_summary_free_vs_forced_uw_students.html")
+tab_model(m2, 
+          transform =  "plogis",
+          pred.labels = c("Intercept",
+                          "Survey condition [.5 = forced-choice]"),
+          file = "../../emotions_dashboard/data/lmer_summary_free_vs_forced_uw_students.html")
 
 
 ######################
