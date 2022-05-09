@@ -136,14 +136,14 @@ df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
 
 sum(df.free$emotion == 'anger') # 953
 sum(df.free$emotion == 'disgust') # 576
-sum(df.free$emotion == 'fear') # 384
+sum(df.free$emotion == 'fear') # 383
 sum(df.free$emotion == 'happiness') # 1258
 sum(df.free$emotion == 'neutral') # 208
 sum(df.free$emotion == 'sadness') # 1366
 sum(df.free$emotion == 'surprise') # 601
 
 
-dim(table(df.free$emotion)) # 847
+dim(table(df.free$emotion)) # (before 847) 434
 table(df.free$label)
 
 head(df.free)
@@ -157,14 +157,15 @@ df.free$condition.dummy <- 0
 df.free$condition.center <- -.5
 
 head(df.free)
+n_distinct(df.free$emotion) # 434 distinct emotion words
 
 
 ###################
 # Comparison 
 ###################
 
-mean(df.forced$correct) # 0.5941317
-mean(df.free$correct) # 0.2467115
+mean(df.forced$correct) # 0.59
+mean(df.free$correct) # 0.26
 
 
 ##################
@@ -209,11 +210,11 @@ m1 <- glmer(correct ~ 1 + condition.dummy + (1 | participantIdF) +  (1 | photoId
 
 summary(m1)
 
-fix.effect = -1.81
+fix.effect = 1.74
 ## odd ratio
-exp(fix.effect) # 0.163
+exp(fix.effect) # 5.69
 ## probability
-plogis(fix.effect) # 0.140
+plogis(fix.effect) # 0.85
 
 ## centered  predictor
 m2 <- glmer(correct ~ 1 + condition.center + (1 | participantIdF)  + (1 | photoIdF),
@@ -222,11 +223,11 @@ m2 <- glmer(correct ~ 1 + condition.center + (1 | participantIdF)  + (1 | photoI
 
 summary(m2)
 
-fix.effect = -1.81
+fix.effect = 1.74
 ## odd ratio
-exp(fix.effect) # 0.163
+exp(fix.effect) # 5.69
 ## probability
-plogis(fix.effect) # 0.140
+plogis(fix.effect) # 0.85
 
 
 ### get mathematical formula
@@ -299,9 +300,9 @@ names(correct.survey)[4] <- "correct"
 
 correct.survey.plot <- ggplot(correct.survey, aes(x=condition, y=correct)) + 
   geom_bar(position=position_dodge(), stat="identity") +
-  geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
-                width=.2,                    # Width of the error bars
-                position=position_dodge(.9)) +
+  # geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
+  #               width=.2,                    # Width of the error bars
+  #               position=position_dodge(.9)) +
   labs(x = "survey condition",
        title = "Correct responses grouped by Wordnet synonyms") + 
   theme_apa()
@@ -309,7 +310,6 @@ correct.survey.plot <- ggplot(correct.survey, aes(x=condition, y=correct)) +
 
 correct.survey.plot
 
-ggsave('accuracy-charts/correct-survey.png', width = 4, height = 4)
 
 s <- svgstring(width = 7,
                height = 5)
@@ -323,6 +323,7 @@ cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-survey_mturk.
 
 dev.off()
 
+ggsave('accuracy-charts/correct-survey.png', width = 4, height = 4)
 
 
 ###############
@@ -337,9 +338,9 @@ names(correct.label)[4] <- "correct"
 
 correct.label.plot <- ggplot(correct.label, aes(x = reorder(label, -correct), y=correct)) + 
   geom_bar(position=position_dodge(), stat="identity") +
-  geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
-                width=.2,                    # Width of the error bars
-                position=position_dodge(.9)) +
+  # geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
+  #               width=.2,                    # Width of the error bars
+  #               position=position_dodge(.9)) +
   labs(x = "expected emotion label",
        title = "Correct responses grouped by Wordnet synonyms") + 
   theme_apa()
@@ -377,9 +378,9 @@ names(correct.survey.label)[5] <- "correct"
 
 correct.survey.label.plot <- ggplot(correct.survey.label, aes(x = reorder(label, -correct), y=correct, fill=condition)) + 
   geom_bar(position=position_dodge(), stat="identity") +
-  geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
-                width=.2,                    # Width of the error bars
-                position=position_dodge(.9)) +
+  # geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
+  #               width=.2,                    # Width of the error bars
+  #               position=position_dodge(.9)) +
   labs(x = "expected emotion label",
        title = "Correct responses grouped by Wordnet synonyms") + 
   theme_apa()
@@ -398,7 +399,4 @@ cat(svg.string.plot, file = "../../emotions_dashboard/data/correct-label-survey_
 
 dev.off()
 
-
 ggsave('accuracy-charts/correct-label-survey.png', width = 8, height = 4)
-
-

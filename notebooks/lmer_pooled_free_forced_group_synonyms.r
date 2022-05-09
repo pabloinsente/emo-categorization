@@ -53,7 +53,7 @@ library(plyr)
 ## baseline count 
 sum(df.free$emotion == 'anger') # 435
 sum(df.free$emotion == 'disgust') # 294
-sum(df.free$emotion == 'fear') # 31
+sum(df.free$emotion == 'fear') # 30
 sum(df.free$emotion == 'happiness') # 830
 sum(df.free$emotion == 'neutral') # 16
 sum(df.free$emotion == 'sadness') # 749
@@ -136,7 +136,7 @@ df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
 
 sum(df.free$emotion == 'anger') # 716
 sum(df.free$emotion == 'disgust') # 385
-sum(df.free$emotion == 'fear') # 41
+sum(df.free$emotion == 'fear') # 36
 sum(df.free$emotion == 'happiness') # 1254
 sum(df.free$emotion == 'neutral') # 57
 sum(df.free$emotion == 'sadness') # 1027
@@ -144,7 +144,7 @@ sum(df.free$emotion == 'surprise') # 490
 
 table(df.free$emotion)
 
-dim(table(df.free$emotion)) # 1056
+dim(table(df.free$emotion)) # 445
 table(df.free$label)
 
 head(df.free)
@@ -158,7 +158,10 @@ df.free$condition.dummy <- 0
 df.free$condition.center <- -.5
 
 head(df.free)
+n_distinct(df.free$emotion) # 445 distinct emotion words
 
+
+table(df.free$emotion)
 
 ###################
 # Comparison 
@@ -189,6 +192,9 @@ df <- rbind(df.forced, df.free)
 df$participantIdF <- as.factor(df$participantId)
 df$photoIdF <- as.factor(df$photoId)
 
+# save for pooling with mturk sample
+write_csv(df, "../clean_data/accuracy_grouped.csv")
+
 ####################
 # LMER
 ####################
@@ -211,11 +217,11 @@ m1 <- glmer(correct ~ 1 + condition.dummy + (1 | participantIdF) +  (1 | photoId
 
 summary(m1)
 
-fix.effect = -2.50
+fix.effect = 2.41
 ## odd ratio
-exp(fix.effect) #  0.08
+exp(fix.effect) #  11.13396
 ## probability
-plogis(fix.effect) # 0.075
+plogis(fix.effect) # 0.9175867
 
 ## centered  predictor
 m2 <- glmer(correct ~ 1 + condition.center + (1 | participantIdF)  + (1 | photoIdF),
@@ -224,11 +230,11 @@ m2 <- glmer(correct ~ 1 + condition.center + (1 | participantIdF)  + (1 | photoI
 
 summary(m2)
 
-fix.effect = -2.50
+fix.effect = 2.41
 ## odd ratio
-exp(fix.effect) #  0.08
+exp(fix.effect) #  11.13396
 ## probability
-plogis(fix.effect) # 0.075
+plogis(fix.effect) # 0.9175867
 
 
 
@@ -302,9 +308,9 @@ names(correct.survey)[4] <- "correct"
 
 correct.survey.plot <- ggplot(correct.survey, aes(x=condition, y=correct)) + 
   geom_bar(position=position_dodge(), stat="identity") +
-  geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
-                width=.2,                    # Width of the error bars
-                position=position_dodge(.9)) +
+  # geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
+  #               width=.2,                    # Width of the error bars
+  #               position=position_dodge(.9)) +
   labs(x = "survey condition",
        title = "Correct responses grouped by Wordnet synonyms") + 
   theme_apa()
@@ -339,9 +345,9 @@ names(correct.label)[4] <- "correct"
 
 correct.label.plot <- ggplot(correct.label, aes(x = reorder(label, -correct), y=correct)) + 
   geom_bar(position=position_dodge(), stat="identity") +
-  geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
-                width=.2,                    # Width of the error bars
-                position=position_dodge(.9)) +
+  # geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
+  #               width=.2,                    # Width of the error bars
+  #               position=position_dodge(.9)) +
   labs(x = "expected emotion label",
        title = "Correct responses grouped by Wordnet synonyms") + 
   theme_apa()
@@ -377,12 +383,11 @@ correct.survey.label
 names(correct.survey.label)[5] <- "correct"
 
 
-
 correct.survey.label.plot <- ggplot(correct.survey.label, aes(x = reorder(label, -correct), y=correct, fill=condition)) + 
   geom_bar(position=position_dodge(), stat="identity") +
-  geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
-                width=.2,                    # Width of the error bars
-                position=position_dodge(.9)) +
+  # geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
+  #               width=.2,                    # Width of the error bars
+  #               position=position_dodge(.9)) +
   labs(x = "expected emotion label",
        title = "Correct responses grouped by Wordnet synonyms") + 
   theme_apa()

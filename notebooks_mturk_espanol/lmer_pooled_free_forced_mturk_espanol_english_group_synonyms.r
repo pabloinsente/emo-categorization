@@ -150,16 +150,16 @@ from_words = syns$neutral
 to_word = replicate(n, 'neutral')
 df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
 
-sum(df.free$emotion == 'anger') # 798
+sum(df.free$emotion == 'anger') # 717
 sum(df.free$emotion == 'disgust') # 382
-sum(df.free$emotion == 'fear') # 102
-sum(df.free$emotion == 'happiness') # 861
+sum(df.free$emotion == 'fear') # 451
+sum(df.free$emotion == 'happiness') # 1031
 sum(df.free$emotion == 'neutral') # 148
 sum(df.free$emotion == 'sadness') # 826
 sum(df.free$emotion == 'surprise') # 988
 
 
-dim(table(df.free$emotion)) # 442
+dim(table(df.free$emotion)) # 290
 table(df.free$label)
 
 head(df.free)
@@ -173,6 +173,9 @@ df.free$condition.dummy <- 0
 df.free$condition.center <- -.5
 
 head(df.free)
+
+n_distinct(df.free$emotion) # 290 distinct emotion words
+
 
 ##################
 # join dataframes for lmer
@@ -218,9 +221,13 @@ df.english$language.condition.center <- -.5
 # to avoid id duplication
 df.english$participantId <- df.english$participantId + 1000 
 
+df.english = subset(df.english, select = -c(sex_participant,ethnicity_participant) )
+
 df.pool <- rbind(df, df.english)
 
 df.pool
+
+
 
 ###################
 # Comparison 
@@ -229,8 +236,8 @@ library(crosstable)
 library(apaTables)
 
 
-mean(df$correct) # 0.4634329
-mean(df.english$correct) # 0.3802117
+mean(df$correct) # 0.4889444
+mean(df.english$correct) # 0.3929795
 
 
 crosstable(df.pool, c(condition, language.condition), by=correct,  total="both") %>%
@@ -256,7 +263,7 @@ library(lme4)
 
 ########################
 ## dummy coded predictor
-# 
+#  This test SIMPLE effects
 # df.pool$condition.dummy <- to_factor(df.pool$condition.dummy)
 # df.pool$language.condition.dummy <- to_factor(df.pool$language.condition.dummy)
 
@@ -268,34 +275,34 @@ summary(m1)
 
 ##########
 ## free vs forced condition
-fix.effect = 1.57017
+fix.effect = 1.49684
 ## odd ratio
-exp(fix.effect) # 4.807465
+exp(fix.effect) #4.467
 ## probability
-plogis(fix.effect) # 0.8278078
+plogis(fix.effect) # 0.81
 
 
 ##########
-## free vs forced condition
-fix.effect = 0.30117
+## english vs spanish condition
+fix.effect = 0.45
 ## odd ratio
-exp(fix.effect) # 1.351439
+exp(fix.effect) # 1.56
 ## probability
-plogis(fix.effect) # 0.5747285
+plogis(fix.effect) # 0.61
 
 
 ##########
-## free vs forced condition
-fix.effect = 0.33788
+## survey-condition * language condition interaction
+fix.effect = 0.173
 ## odd ratio
-exp(fix.effect) # 1.401972
+exp(fix.effect) # 1.18
 ## probability
-plogis(fix.effect) # 0.5836755
+plogis(fix.effect) # 0.54
 
 
 #######################
 ## centered  predictor
-
+## This test MAIN effects
 # df.pool$condition.center <- to_factor(df.pool$condition.center)
 # df.pool$language.condition.center <- to_factor(df.pool$language.condition.center)
 
@@ -306,6 +313,31 @@ m2 <- glmer(correct ~ 1 + condition.center*language.condition.center + (1 | part
 
 summary(m2)
 
+##########
+## free vs forced condition
+fix.effect = 1.58
+## odd ratio
+exp(fix.effect) #4.8
+## probability
+plogis(fix.effect) # 0.82
+
+
+##########
+## english vs spanish condition
+fix.effect = 0.5396
+## odd ratio
+exp(fix.effect) # 1.71
+## probability
+plogis(fix.effect) # 0.63
+
+
+##########
+## survey-condition * language condition interaction
+fix.effect = 0.173
+## odd ratio
+exp(fix.effect) # 1.18
+## probability
+plogis(fix.effect) # 0.54
 
 ### get mathematical formula
 # formula_lmer <- extract_eq(m2)
@@ -348,12 +380,14 @@ lang.main
 survey.main <- plot_model(m2, type = "eff", terms = c("condition.center")) +
   labs(x = "survey method", color="") + 
   theme_apa()
+
 survey.main
 
 # interaction effect language X survey method
 inter.effect <- plot_model(m2, type = "eff", terms = c("language.condition.center", "condition.center")) +
   labs(x = "language condition", color="survey method") + 
   theme_apa()
+
 inter.effect
 
 ##########################
@@ -436,9 +470,9 @@ names(correct.survey)[4] <- "correct"
 
 correct.survey.plot <- ggplot(correct.survey, aes(x=condition, y=correct)) + 
   geom_bar(position=position_dodge(), stat="identity") +
-  geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
-                width=.2,                    # Width of the error bars
-                position=position_dodge(.9)) +
+  # geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
+  #               width=.2,                    # Width of the error bars
+  #               position=position_dodge(.9)) +
   labs(x = "survey condition",
        title = "Correct responses grouped by Wordnet synonyms (pooled surveys)") + 
   theme_apa()
@@ -477,9 +511,9 @@ names(correct.lang)[4] <- "correct"
 
 correct.lang.plot <- ggplot(correct.lang, aes(x=language.condition, y=correct)) + 
   geom_bar(position=position_dodge(), stat="identity") +
-  geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
-                width=.2,                    # Width of the error bars
-                position=position_dodge(.9)) +
+  # geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
+  #               width=.2,                    # Width of the error bars
+  #               position=position_dodge(.9)) +
   labs(x = "language condition",
        title = "Correct responses grouped by Wordnet synonyms (pooled surveys)") + 
   theme_apa()
@@ -516,9 +550,9 @@ names(correct.survey.lang)[5] <- "correct"
 
 correct.survey.lang.plot <- ggplot(correct.survey.lang, aes(x = reorder(language.condition, -correct), y=correct, fill=condition)) + 
   geom_bar(position=position_dodge(), stat="identity") +
-  geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
-                width=.2,                    # Width of the error bars
-                position=position_dodge(.9))+
+  # geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
+  #               width=.2,                    # Width of the error bars
+  #               position=position_dodge(.9))+
   labs(x = "expected emotion label",
        title = "Correct responses grouped by Wordnet synonyms") + 
   theme_apa()
