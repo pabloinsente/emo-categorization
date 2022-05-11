@@ -10,6 +10,8 @@ df.free = read_csv("../clean_data/free_labeling_emotion_uw_students_long_format_
 df.forced = read_csv("../clean_data/forced_choice_emotion_uw_students_long_format_lmer.csv")
 
 syns = fromJSON(file = "../clean_data/syn_dict_emotions.json")
+hyps = fromJSON(file = "../clean_data/hyp_dict_emotions.json")
+
 
 ## match spelling
 df.forced$emotion <- tolower(df.forced$emotion)
@@ -41,6 +43,7 @@ df.forced$condition.center <- .5
 
 head(df.forced)
 n_distinct(df.free$emotion) # 445 distinct emotion words
+length(df.free$emotion) # 12103
 
 
 ##########################
@@ -61,6 +64,8 @@ sum(df.free$emotion == 'neutral') # 16
 sum(df.free$emotion == 'sadness') # 749
 sum(df.free$emotion == 'surprise') # 262
 
+######################
+# Replace cog synonyms
 
 # anger
 n = length(syns$anger)
@@ -136,6 +141,8 @@ from_words = syns$neutral
 to_word = replicate(n, 'neutral')
 df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
 
+
+## after replacing with synsets
 sum(df.free$emotion == 'anger') # 716
 sum(df.free$emotion == 'disgust') # 385
 sum(df.free$emotion == 'fear') # 38
@@ -144,12 +151,69 @@ sum(df.free$emotion == 'neutral') # 57
 sum(df.free$emotion == 'sadness') # 1027
 sum(df.free$emotion == 'surprise') # 490
 
-table(df.free$emotion)
 
-dim(table(df.free$emotion)) # 445
+###################
+## replace hyponyms
+
+# anger
+n = length(hyps$anger)
+from_words = hyps$anger
+to_word = replicate(n, 'anger')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# neutral 
+n = length(hyps$neutral)
+from_words = hyps$neutral
+to_word = replicate(n, 'neutral')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# disgust
+n = length(hyps$disgust)
+from_words = hyps$disgust
+to_word = replicate(n, 'disgust')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# fear
+n = length(hyps$fear)
+from_words = hyps$fear
+to_word = replicate(n, 'fear')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# happiness
+n = length(hyps$happiness)
+from_words = hyps$happiness
+to_word = replicate(n, 'happiness')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# sadness
+n = length(hyps$sadness)
+from_words = hyps$sadness
+to_word = replicate(n, 'sadness')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# surprise
+n = length(hyps$surprise)
+from_words = hyps$surprise
+to_word = replicate(n, 'surprise')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+
+
+## after replacing with hyponyms too
+sum(df.free$emotion == 'anger') # 732
+sum(df.free$emotion == 'disgust') # 478
+sum(df.free$emotion == 'fear') # 69
+sum(df.free$emotion == 'happiness') # 1256
+sum(df.free$emotion == 'neutral') # 57
+sum(df.free$emotion == 'sadness') # 1051
+sum(df.free$emotion == 'surprise') # 490
+
+
+################
+# scared is not among synsets or hyponyms 
+df.free$emotion <- mapvalues(df.free$emotion, from="scared", to="fear")
+
+sum(df.free$emotion == 'fear') # 408
+
+
+dim(table(df.free$emotion)) # 457
 table(df.free$label)
 
-head(df.free)
+# anger   disgust      fear happiness   neutral   sadness  surprise 
+# 1717      1701      1829      1748      1479      1853      1776 
 
 ## add target 
 df.free$correct <- ifelse(df.free$emotion == df.free$label, 1, 0)
@@ -169,8 +233,8 @@ table(df.free$emotion)
 # Comparison 
 ###################
 
-mean(df.forced$correct)
-mean(df.free$correct)
+mean(df.forced$correct) # 0.6453202
+mean(df.free$correct) # 0.2318433
 
 
 ##################
@@ -219,11 +283,13 @@ m1 <- glmer(correct ~ 1 + condition.dummy + (1 | participantIdF) +  (1 | photoId
 
 summary(m1)
 
-fix.effect = 2.41
+fix.effect = 2.17
 ## odd ratio
-exp(fix.effect) #  11.13396
+exp(fix.effect) #  8.67
 ## probability
-plogis(fix.effect) # 0.9175867
+plogis(fix.effect) # 0.89
+
+car::Anova(m1)
 
 ## centered  predictor
 m2 <- glmer(correct ~ 1 + condition.center + (1 | participantIdF)  + (1 | photoIdF),
@@ -232,11 +298,11 @@ m2 <- glmer(correct ~ 1 + condition.center + (1 | participantIdF)  + (1 | photoI
 
 summary(m2)
 
-fix.effect = 2.41
+fix.effect = 2.17
 ## odd ratio
-exp(fix.effect) #  11.13396
+exp(fix.effect) #  8.67
 ## probability
-plogis(fix.effect) # 0.9175867
+plogis(fix.effect) # 0.89
 
 
 
@@ -305,6 +371,12 @@ correct.survey <- df %>%
   get_summary_stats(correct, type = "mean_se")
 
 correct.survey
+# 
+# condition variable     n correct    se
+# <chr>     <chr>    <dbl>   <dbl> <dbl>
+# 1 forced    correct   8120   0.645 0.005
+# 2 free      correct  12103   0.232 0.004
+
 
 names(correct.survey)[4] <- "correct"
 
