@@ -289,7 +289,16 @@ exp(fix.effect) #  8.67
 ## probability
 plogis(fix.effect) # 0.89
 
-car::Anova(m1)
+car::Anova(m1, type=3)
+# 
+# Analysis of Deviance Table (Type III Wald chisquare tests)
+# 
+# Response: correct
+# Chisq Df Pr(>Chisq)    
+# (Intercept)      94.238  1  < 2.2e-16 ***
+# condition.dummy 185.024  1  < 2.2e-16 ***
+# ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 ## centered  predictor
 m2 <- glmer(correct ~ 1 + condition.center + (1 | participantIdF)  + (1 | photoIdF),
