@@ -10,6 +10,7 @@ df.free = read_csv("../clean_data_mturk/free_labeling_emotion_mturk_long_format_
 df.forced = read_csv("../clean_data_mturk/forced_choice_emotion_mturk_long_format_lmer.csv")
 
 syns = fromJSON(file = "../clean_data/syn_dict_emotions.json")
+hyps = fromJSON(file = "../clean_data/hyp_dict_emotions.json")
 
 ## match spelling
 df.forced$emotion <- tolower(df.forced$emotion)
@@ -22,9 +23,9 @@ df.free <- subset(df.free, emotion!="uncertain")
 df.forced <- subset(df.forced, label!="uncertain")
 df.forced <- subset(df.forced, emotion!="uncertain")
 
-##########################
+##############################
 # Forced-choice pre-processing
-##########################
+##############################
 
 table(df.forced$emotion)
 table(df.forced$label)
@@ -40,6 +41,9 @@ df.forced$condition.center <- .5
 
 
 head(df.forced)
+n_distinct(df.free$emotion) # 449 distinct emotion words
+length(df.free$emotion) # 12674
+
 
 ##########################
 # Free-choice pre-processing
@@ -58,6 +62,10 @@ sum(df.free$emotion == 'happiness') # 1064
 sum(df.free$emotion == 'neutral') # 181
 sum(df.free$emotion == 'sadness') # 1195
 sum(df.free$emotion == 'surprise') # 530
+
+
+######################
+# Replace cog synonyms
 
 
 # anger
@@ -144,9 +152,69 @@ sum(df.free$emotion == 'surprise') # 601
 
 
 dim(table(df.free$emotion)) # (before 847) 434
+
+###################
+## replace hyponyms
+
+
+# anger
+n = length(hyps$anger)
+from_words = hyps$anger
+to_word = replicate(n, 'anger')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# neutral 
+n = length(hyps$neutral)
+from_words = hyps$neutral
+to_word = replicate(n, 'neutral')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# disgust
+n = length(hyps$disgust)
+from_words = hyps$disgust
+to_word = replicate(n, 'disgust')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# fear
+n = length(hyps$fear)
+from_words = hyps$fear
+to_word = replicate(n, 'fear')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# happiness
+n = length(hyps$happiness)
+from_words = hyps$happiness
+to_word = replicate(n, 'happiness')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# sadness
+n = length(hyps$sadness)
+from_words = hyps$sadness
+to_word = replicate(n, 'sadness')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# surprise
+n = length(hyps$surprise)
+from_words = hyps$surprise
+to_word = replicate(n, 'surprise')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+
+
+## after replacing with hyponyms too
+sum(df.free$emotion == 'anger') # 980
+sum(df.free$emotion == 'disgust') # 695
+sum(df.free$emotion == 'fear') # 394
+sum(df.free$emotion == 'happiness') # 1258
+sum(df.free$emotion == 'neutral') # 208
+sum(df.free$emotion == 'sadness') # 1375
+sum(df.free$emotion == 'surprise') # 601
+
+################
+# scared is not among synsets or hyponyms 
+df.free$emotion <- mapvalues(df.free$emotion, from="scared", to="fear")
+
+sum(df.free$emotion == 'fear') # 639
+
+
+dim(table(df.free$emotion)) # 422
 table(df.free$label)
 
-head(df.free)
+# anger   disgust      fear happiness   neutral   sadness  surprise 
+# 1811      1793      1951      1837      1550      1909      1823 
 
 ## add target 
 df.free$correct <- ifelse(df.free$emotion == df.free$label, 1, 0)
@@ -210,11 +278,22 @@ m1 <- glmer(correct ~ 1 + condition.dummy + (1 | participantIdF) +  (1 | photoId
 
 summary(m1)
 
-fix.effect = 1.74
+fix.effect = 1.6254
 ## odd ratio
-exp(fix.effect) # 5.69
+exp(fix.effect) # 5.080
 ## probability
-plogis(fix.effect) # 0.85
+plogis(fix.effect) # 0.835
+
+car::Anova(m1, type=3)
+
+# Analysis of Deviance Table (Type III Wald chisquare tests)
+# 
+# Response: correct
+# Chisq Df Pr(>Chisq)    
+# (Intercept)     55.013  1  1.197e-13 ***
+# condition.dummy 74.111  1  < 2.2e-16 ***
+# ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 ## centered  predictor
 m2 <- glmer(correct ~ 1 + condition.center + (1 | participantIdF)  + (1 | photoIdF),
@@ -223,12 +302,11 @@ m2 <- glmer(correct ~ 1 + condition.center + (1 | participantIdF)  + (1 | photoI
 
 summary(m2)
 
-fix.effect = 1.74
+fix.effect = 1.6254
 ## odd ratio
-exp(fix.effect) # 5.69
+exp(fix.effect) # 5.080
 ## probability
-plogis(fix.effect) # 0.85
-
+plogis(fix.effect) # 0.835
 
 ### get mathematical formula
 formula_lmer <- extract_eq(m1)
@@ -267,12 +345,12 @@ dev.off()
 
 ### get coefficient table for reporting
 
-tab_model(m2, 
+tab_model(m1, 
           pred.labels = c("Intercept",
                           "Survey condition [.5 = forced-choice]"),
           file = "../../emotions_dashboard/data/lmer_summary_odds_free_vs_forced_mturk.html")
 
-tab_model(m2, 
+tab_model(m1, 
           transform =  "plogis",
           pred.labels = c("Intercept",
                           "Survey condition [.5 = forced-choice]"),
