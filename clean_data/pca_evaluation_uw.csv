@@ -1,0 +1,5 @@
+title,silhouette_score,calinski_harabasz_score,davies_bouldin_score,survey_method,cluster_method,ethnicity,pca_dims,k_means_groups,ethnicity_method,PCA dimensions
+forced_choice_2D_aggregated,0.0900966475876412,95.89023638857432,1.9900241714978788,forced-choice,pca,all,2,,all_forced_choice,2D-forced-choice
+free_choice_2D_aggregated,0.0035741923382045424,51.46160768309563,2.8586262779060254,free-response,pca,all,2,,all_free_labeling,2D-free-response
+forced_choice_3D_aggregated,0.18405564034627223,82.0224047133709,1.5388277601817313,forced-choice,pca,all,3,,all_forced_choice,3D-forced-choice
+free_choice_3D_aggregated,0.029173857831338457,45.608504143551826,1.8240029645172116,free-response,pca,all,3,,all_free_labeling,3D-free-response

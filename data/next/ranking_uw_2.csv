@@ -1,0 +1,65 @@
+StartDate,EndDate,Status,IPAddress,Progress,Duration (in seconds),Finished,RecordedDate,ResponseId,RecipientLastName,RecipientFirstName,RecipientEmail,ExternalReference,LocationLatitude,LocationLongitude,DistributionChannel,UserLanguage,Q1,Q2,Q3_1,Q4,Q5,Q6_1,Q7,Q7_8_TEXT
+Start Date,End Date,Response Type,IP Address,Progress,Duration (in seconds),Finished,Recorded Date,Response ID,Recipient Last Name,Recipient First Name,Recipient Email,External Data Reference,Location Latitude,Location Longitude,Distribution Channel,User Language,"UNIVERSITY OF WISCONSIN-MADISON
+
+Research Participant Information and Consent Form 
+
+Title of the Study: Learning meanings of words and objects
+
+Principal Investigator: Tim Rogers (ttrogers@wisc.edu)
+
+DESCRIPTION OF THE RESEARCH
+
+You are invited to participate in a research study about the process by which people learn to recognize and understand the meanings of words and pictures. This study is recruiting Amazon Mechanical Turk workers above the age of 18. Your participation is voluntary. The research will be conducted online through a web browser.
+
+WHAT WILL MY PARTICIPATION INVOLVE?
+
+Participants will be asked to complete one session of less than half an hour. During this time you will view words or pictures on the computer screen and will be asked to press keys on the keyboard or mouse in response. You may also be asked to complete one or more questionnaires.
+
+HOW WILL I BE COMPENSATED FOR PARTICIPATING?
+
+You will be compensated with extra credit in your introductory Psychology class at the normal rate of 1 credit for every half hour of participation.
+
+ARE THERE ANY RISKS TO ME?
+
+Participants may risk accidental breach of confidentiality. There are no other anticipated risks to subjects participating in this experiment.
+
+ARE THERE ANY BENEFITS TO ME?
+
+There are no direct benefits to you for participation in this study.
+
+HOW WILL MY CONFIDENTIALITY BE PROTECTED?
+
+All data will be identified only with a randomly-generated participant number and not with your name or other identifying information. While there will probably be publications as a result of this study, your name will not be used. Only group characteristics will be published.
+
+WHOM SHOULD I CONTACT IF I HAVE QUESTIONS?
+
+You may ask any questions about the research at any time by emailing the Principal Investigator Tim Rogers at ttrogers@wisc.edu. If you have questions about your rights as a research participant you should contact the Social & Behavioral Science IRB at UW Madison at (608) 263-2320.
+
+Your participation is completely voluntary. If you decide not to participate or to withdraw from the study it will have no effect on your grade in class.
+
+Clicking “I consent” below indicates that you have read this document and voluntarily consent to participate in the study.",Please select the gender identity that you identify as:,Please move the slider to select your age : - Age in years,Please select the ethnicity that you identify as:,Please select your highest level of education you have completed:,Please move the slider to select your approximated annual household income: - In US Dollars,Please select all the languages that you speak fluently: - Selected Choice,Please select all the languages that you speak fluently: - Other - Text
+"{""ImportId"":""startDate"",""timeZone"":""America/Denver""}","{""ImportId"":""endDate"",""timeZone"":""America/Denver""}","{""ImportId"":""status""}","{""ImportId"":""ipAddress""}","{""ImportId"":""progress""}","{""ImportId"":""duration""}","{""ImportId"":""finished""}","{""ImportId"":""recordedDate"",""timeZone"":""America/Denver""}","{""ImportId"":""_recordId""}","{""ImportId"":""recipientLastName""}","{""ImportId"":""recipientFirstName""}","{""ImportId"":""recipientEmail""}","{""ImportId"":""externalDataReference""}","{""ImportId"":""locationLatitude""}","{""ImportId"":""locationLongitude""}","{""ImportId"":""distributionChannel""}","{""ImportId"":""userLanguage""}","{""ImportId"":""QID2""}","{""ImportId"":""QID3""}","{""ImportId"":""QID4_1""}","{""ImportId"":""QID5""}","{""ImportId"":""QID6""}","{""ImportId"":""QID7_1""}","{""ImportId"":""QID8""}","{""ImportId"":""QID8_8_TEXT""}"
+2021-12-15 09:12:51,2021-12-15 09:13:14,IP Address,107.208.176.119,100,22,True,2021-12-15 09:13:14,R_sBDFjXhj55SPPIl,,,,,43.1204986572265625,-89.35230255126953125,anonymous,EN,I consent,Non-binary / third gender,33,Hispanic or Latino,Master's degree,30665,"English,Spanish",
+2021-12-15 13:14:58,2021-12-15 13:15:21,IP Address,107.208.176.119,100,22,True,2021-12-15 13:15:21,R_2ALTKvz3XXQ6UFL,,,,,43.1204986572265625,-89.35230255126953125,anonymous,EN,I consent,Non-binary / third gender,33,Hispanic or Latino,Master's degree,30454,"English,Spanish",
+2021-12-15 13:22:43,2021-12-15 13:24:31,IP Address,72.33.0.129,100,108,True,2021-12-15 13:24:32,R_1EgGb2FUEg6vNAx,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Male,,White or Caucasian,High school graduate,,English,
+2021-12-15 13:27:25,2021-12-15 13:30:30,IP Address,72.33.0.212,100,185,True,2021-12-15 13:30:30,R_2wdksMcKf0X4QQb,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Female,18,Asian,High school graduate,78592,"English,Hindi,French,Other",Gujarati
+2021-12-15 13:19:08,2021-12-15 13:33:15,IP Address,72.33.2.247,100,847,True,2021-12-15 13:33:16,R_1Nn5lfpPDc8yxES,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Male,18,White or Caucasian,Some college,99930,English,
+2021-12-15 13:33:55,2021-12-15 13:39:44,IP Address,72.33.0.144,100,349,True,2021-12-15 13:39:45,R_PZO0KZ96KVU4bPH,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Female,18,Hispanic or Latino,Some college,150000,English,
+2021-12-15 14:26:09,2021-12-15 14:32:12,IP Address,72.33.0.81,100,362,True,2021-12-15 14:32:12,R_3M5lVGI96Pg0iBf,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Female,19,White or Caucasian,High school graduate,150000,English,
+2021-12-15 14:26:58,2021-12-15 14:34:39,Spam,72.33.2.242,100,460,True,2021-12-15 14:34:39,R_2s1rSfLoZEUPiUC,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Female,18,White or Caucasian,Some college,150000,English,
+2021-12-15 15:19:13,2021-12-15 15:20:12,IP Address,107.208.176.119,100,58,True,2021-12-15 15:20:12,R_27Qh6zJMqvDRJgy,,,,,43.1204986572265625,-89.35230255126953125,anonymous,EN,I consent,Non-binary / third gender,33,Hispanic or Latino,Master's degree,30877,"English,Spanish",
+2021-12-15 15:32:18,2021-12-15 15:33:09,IP Address,72.33.2.227,100,50,True,2021-12-15 15:33:09,R_3033otLGFlmgD4r,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Male,19,White or Caucasian,High school graduate,110070,English,
+2021-12-15 15:33:32,2021-12-15 15:39:00,IP Address,72.33.2.227,100,327,True,2021-12-15 15:39:00,R_24NoXGpDb4K6mxD,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Male,19,White or Caucasian,High school graduate,115352,English,
+2021-12-15 15:43:55,2021-12-15 15:57:27,Spam,72.33.2.138,100,812,True,2021-12-15 15:57:28,R_VVzXckWaVUC3lHH,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Male,,Multiple ethnicities,High school graduate,100141,English,
+2021-12-15 15:44:38,2021-12-15 16:02:33,IP Address,72.33.0.82,100,1075,True,2021-12-15 16:02:34,R_2wSmoK4rd2v3BXi,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Male,19,Asian,High school graduate,,English,
+2021-12-15 16:48:08,2021-12-15 16:48:28,IP Address,107.208.176.119,100,20,True,2021-12-15 16:48:29,R_3nCxhquqYf3dsGL,,,,,43.1204986572265625,-89.35230255126953125,anonymous,EN,I consent,Non-binary / third gender,,Hispanic or Latino,Master's degree,,"English,Spanish",
+2021-12-15 17:07:36,2021-12-15 17:08:09,IP Address,72.33.2.47,100,33,True,2021-12-15 17:08:10,R_AvP2RLr65lpGoWB,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Female,,Asian,Some college,150000,English,
+2021-12-15 17:14:31,2021-12-15 17:15:04,IP Address,72.33.0.148,100,32,True,2021-12-15 17:15:05,R_1DNJbDI8o92H6P4,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Female,18,White or Caucasian,Some college,150000,English,
+2021-12-15 17:16:34,2021-12-15 17:19:13,IP Address,153.33.9.124,100,158,True,2021-12-15 17:19:14,R_1kH90c9EtIVP9QK,,,,,43.081207275390625,-89.38449859619140625,anonymous,EN,I consent,Female,18,White or Caucasian,Some college,150000,English,
+2021-12-15 17:27:13,2021-12-15 17:35:28,IP Address,72.33.2.215,100,494,True,2021-12-15 17:35:29,R_1jpLdTmzj6qUViI,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Male,19,Hispanic or Latino,Some college,140493,English,
+2021-12-15 17:15:13,2021-12-15 18:03:19,IP Address,72.33.0.148,100,2886,True,2021-12-15 18:03:19,R_1pmWX2TlwH9uJ4l,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Female,18,White or Caucasian,Some college,124819,English,
+2021-12-15 18:02:49,2021-12-15 18:12:52,IP Address,72.33.2.30,100,603,True,2021-12-15 18:12:52,R_2fCM4rpmMTcE7YR,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Female,19,White or Caucasian,High school graduate,135423,English,
+2021-12-15 18:24:06,2021-12-15 18:24:42,IP Address,72.33.2.17,100,35,True,2021-12-15 18:24:42,R_2sQOO1fnnRWTgnD,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Female,18,White or Caucasian,Some college,150000,English,
+2021-12-15 18:14:43,2021-12-15 18:24:58,IP Address,72.33.0.44,100,615,True,2021-12-15 18:24:59,R_1IYGBGjHbixIFB6,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Male,18,White or Caucasian,Some college,29789,English,
+2021-12-15 18:24:47,2021-12-15 18:31:15,Spam,72.33.2.17,100,388,True,2021-12-15 18:31:15,R_3no6F7Rwhl1axRi,,,,,43.0782012939453125,-89.407501220703125,anonymous,EN,I consent,Female,18,White or Caucasian,Some college,150000,English,
+2021-12-16 06:33:28,2021-12-16 06:33:56,IP Address,107.208.176.119,100,28,True,2021-12-16 06:33:56,R_Y3Nk5uPINvSIWtz,,,,,43.1204986572265625,-89.35230255126953125,anonymous,EN,I consent,Non-binary / third gender,33,Hispanic or Latino,Master's degree,30454,"English,Spanish",
