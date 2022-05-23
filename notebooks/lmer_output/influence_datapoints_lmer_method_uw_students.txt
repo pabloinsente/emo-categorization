@@ -107,15 +107,15 @@
 <polygon points='214.15,31.40 216.78,35.96 211.51,35.96 ' style='stroke-width: 0.71; stroke: none; fill: #FF0000;' />
 <polygon points='210.14,35.08 212.77,39.64 207.51,39.64 ' style='stroke-width: 0.71; stroke: none; fill: #FF0000;' />
 <line x1='424.75' y1='23.32' x2='407.38' y2='19.99' style='stroke-width: 1.07;' />
-<line x1='328.42' y1='34.02' x2='304.95' y2='23.91' style='stroke-width: 1.07;' />
-<line x1='296.47' y1='37.25' x2='272.98' y2='27.57' style='stroke-width: 1.07;' />
-<line x1='283.83' y1='47.95' x2='269.66' y2='31.62' style='stroke-width: 1.07;' />
-<line x1='226.90' y1='34.45' x2='215.42' y2='34.44' style='stroke-width: 1.07;' />
+<line x1='328.40' y1='34.03' x2='304.95' y2='23.91' style='stroke-width: 1.07;' />
+<line x1='296.51' y1='37.04' x2='272.98' y2='27.56' style='stroke-width: 1.07;' />
+<line x1='283.84' y1='47.72' x2='269.66' y2='31.62' style='stroke-width: 1.07;' />
+<line x1='226.71' y1='34.46' x2='215.42' y2='34.44' style='stroke-width: 1.07;' />
 <text x='433.72' y='28.04' text-anchor='middle' style='font-size: 12.90px; font-family: "Arial";' textLength='14.34px' lengthAdjust='spacingAndGlyphs'>33</text>
-<text x='337.39' y='39.29' text-anchor='middle' style='font-size: 12.90px; font-family: "Arial";' textLength='14.34px' lengthAdjust='spacingAndGlyphs'>65</text>
-<text x='305.44' y='42.49' text-anchor='middle' style='font-size: 12.90px; font-family: "Arial";' textLength='14.34px' lengthAdjust='spacingAndGlyphs'>37</text>
-<text x='285.30' y='58.98' text-anchor='middle' style='font-size: 12.90px; font-family: "Arial";' textLength='14.34px' lengthAdjust='spacingAndGlyphs'>36</text>
-<text x='235.87' y='39.07' text-anchor='middle' style='font-size: 12.90px; font-family: "Arial";' textLength='14.34px' lengthAdjust='spacingAndGlyphs'>64</text>
+<text x='337.38' y='39.30' text-anchor='middle' style='font-size: 12.90px; font-family: "Arial";' textLength='14.34px' lengthAdjust='spacingAndGlyphs'>65</text>
+<text x='305.48' y='42.26' text-anchor='middle' style='font-size: 12.90px; font-family: "Arial";' textLength='14.34px' lengthAdjust='spacingAndGlyphs'>37</text>
+<text x='285.35' y='58.75' text-anchor='middle' style='font-size: 12.90px; font-family: "Arial";' textLength='14.34px' lengthAdjust='spacingAndGlyphs'>36</text>
+<text x='235.68' y='39.07' text-anchor='middle' style='font-size: 12.90px; font-family: "Arial";' textLength='14.34px' lengthAdjust='spacingAndGlyphs'>64</text>
 <line x1='174.99' y1='308.99' x2='174.99' y2='5.98' style='stroke-width: 1.07; stroke: #FF0000; stroke-linecap: butt;' />
 </g>
 <g clip-path='url(#cpMC4wMHw1MDQuMDB8MC4wMHwzNjAuMDA=)'>

@@ -34,6 +34,16 @@ names(df)[7]  <- 'web.frequency'
 head(df)
 
 
+#################
+# median / mean
+
+df %>% get_summary_stats(web.frequency, type = "median")
+
+df %>% get_summary_stats(web.frequency, type = "mean")
+
+
+df %>% group_by(method) %>%  get_summary_stats(web.frequency, type = "median_iqr")
+
 ####################
 # T-test assumptions
 
@@ -53,6 +63,10 @@ ggqqplot(df2, x = "web.frequency")
 
 ################
 # basic exploration
+
+df2 %>% get_summary_stats(web.frequency, type = "median") # 3948680
+
+df2 %>% get_summary_stats(web.frequency, type = "mean") # 4691069
 
 df2 %>%
   group_by(method) %>%
@@ -287,6 +301,8 @@ dev.off()
 # datapoints level
 
 infl <- hlm_influence(m1, level = 1)
+infl
+
 # IQR = as.numeric(format(IQR(infl$cooksd)*3, scientific = F))
 CutOff = 4/nrow(infl)
 print(CutOff)
@@ -470,15 +486,18 @@ names(method.table.re)[4] <- "web.frequency.mean"
 method.table.re
 
 # # Mean + std error of the mean 
-freq.method.re <- ggplot(method.table.re, aes(x=method, y=web.frequency.mean, color=method)) +
-  geom_errorbar(aes(ymin=web.frequency.mean-se, ymax=web.frequency.mean+se), width=.1) +
-  geom_point() +
-  labs (title= "Mean and SEM web frequency by survey method") +
-  guides(color="none") + 
+freq.method.re <- ggplot(method.table.re, aes(x=method, y=web.frequency.mean, fill=method)) +
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_errorbar(aes(ymin=web.frequency.mean-se, ymax=web.frequency.mean+se), width=.2) +
+  labs (y="Word-frequency",
+        x="Ranking method") +
+  guides(color="none", fill="none") + 
+  geom_signif(comparisons = list(c("dueling.bandits", "survey")), 
+              annotation=c("***")) +
   theme_apa()
 
 freq.method.re
-
 
 
 ##################################
@@ -542,7 +561,7 @@ cat(svg.string.plot, file = "../../emotions_dashboard/data/web_freq_method_uw_st
 dev.off()
 
 
-ggsave('accuracy-charts/web_freq_method_uw_students_re.png', width = 8, height = 4)
+ggsave('accuracy-charts/web_freq_method_uw_students_re.png', width = 4, height = 4)
 
 qqmath(m3, id=0.05) #id: identifies values that may be exerting undue influence on the model (i.e. outliers)
 
