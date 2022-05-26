@@ -32,6 +32,21 @@ names(df)[7]  <- 'web.frequency'
 
 head(df)
 
+#################
+# median / mean
+
+df %>% get_summary_stats(web.frequency, type = "median")
+# 1 web.frequency    96 4891725
+
+df %>% get_summary_stats(web.frequency, type = "mean")
+# 1 web.frequency    96 11695480.
+
+df %>% group_by(method) %>%  get_summary_stats(web.frequency, type = "median_iqr")
+# 
+# method          variable          n   median      iqr
+# <chr>           <chr>         <dbl>    <dbl>    <dbl>
+#   1 dueling.bandits web.frequency    48 2956984. 6099642.
+# 2 survey          web.frequency    48 7865218. 5218753.
 
 ####################
 # T-test assumptions
@@ -41,18 +56,21 @@ outliers <- df %>% identify_outliers(web.frequency)
 outliers # content, friendly, interested, serious
 
 
+length(df$word)
+
 # filter out extreme outliers
-df2 <- subset(df, photoID != 15 & photoID != 13 & photoID != 20)
+df2 <- subset(df, word != 'content' & word != 'friendly' & word != 'interested' & word != 'serious')
 
-## Check normality assumption
-df2 %>% shapiro_test(web.frequency)
-# not normal
+length(df2$word)
 
-ggqqplot(df2, x = "web.frequency")
-# not normal
 
 ################
 # basic exploration
+
+
+df2 %>% get_summary_stats(web.frequency, type = "median") # 3948680
+
+df2 %>% get_summary_stats(web.frequency, type = "mean") # 6493011
 
 df2 %>%
   group_by(method) %>%
@@ -86,10 +104,10 @@ ggsave('accuracy-charts/web_freq_method_boxplot_mturk.png', width = 8, height = 
 ####################
 # T test 
 
-stat.test <- df2  %>% 
-  t_test(web.frequency ~ method, paired = TRUE) %>%
-  add_significance()
-stat.test
+# stat.test <- df2  %>% 
+#   t_test(web.frequency ~ method, paired = TRUE) %>%
+#   add_significance()
+# stat.test
 
 ########################
 ########################
@@ -112,20 +130,32 @@ m1<-lmer(
 
 summary(m1)
 
+# Fixed effects:
+#   Estimate Std. Error        df t value Pr(>|t|)    
+# (Intercept)  4.719e+06  1.067e+06 7.821e+01   4.421 3.13e-05 ***
+# method.dummy 3.498e+06  1.440e+06 3.412e+05   2.430   0.0151 *  
+# ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# 
+# Correlation of Fixed Effects:
+# (Intr)
+# method.dmmy -0.683
+
+
 tab_model(m1)
 
 tab_model(m1, file = "lmer_output/lmer_summary_method_ranking_mturk.html")
 tab_model(m1, file = "../../emotions_dashboard/data/lmer_summary_method_ranking_mturk.html")
 
 
-Anova(m1, type = "III")
+car::Anova(m1, type=3)
 # 
 # Analysis of Deviance Table (Type III Wald chisquare tests)
 # 
 # Response: web.frequency
 # Chisq Df Pr(>Chisq)    
-# (Intercept)  18.6964  1  1.533e-05 ***
-#   method.dummy  4.8155  1    0.02821 *  
+# (Intercept)  19.5472  1  9.814e-06 ***
+#   method.dummy  5.9055  1    0.01509 *  
 #   ---
 #   Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
@@ -313,7 +343,7 @@ head(high_cooksd, n=10)
 
 #### high influence data points
 
-high_cooksd$id # 26 30 27 29 28 25
+high_cooksd$id # 27 31 28 30 29 26
 
 
 ##############
@@ -453,7 +483,30 @@ m3<-lmer(
   data = df.filtered)
 
 summary(m3)
-Anova(m3, type = "III")
+
+# Fixed effects:
+#   Estimate Std. Error        df t value Pr(>|t|)    
+# (Intercept)  3.618e+06  6.829e+05 6.446e+01   5.299 1.51e-06 ***
+#   method.dummy 2.672e+06  8.792e+05 1.268e+05   3.039  0.00237 ** 
+#   ---
+#   Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# 
+# Correlation of Fixed Effects:
+#   (Intr)
+# method.dmmy -0.637
+
+
+car::Anova(m1, type=3)
+# 
+# Analysis of Deviance Table (Type III Wald chisquare tests)
+# 
+# Response: web.frequency
+# Chisq Df Pr(>Chisq)    
+# (Intercept)  19.5472  1  9.814e-06 ***
+# method.dummy  5.9055  1    0.01509 *  
+# ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
 tab_model(m3)
 
 #####################################
@@ -472,11 +525,15 @@ names(method.table.re)[4] <- "web.frequency.mean"
 method.table.re
 
 # # Mean + std error of the mean 
-freq.method.re <- ggplot(method.table.re, aes(x=method, y=web.frequency.mean, color=method)) +
-  geom_errorbar(aes(ymin=web.frequency.mean-se, ymax=web.frequency.mean+se), width=.1) +
-  geom_point() +
-  labs (title= "Mean and SEM web frequency by survey method") +
-  guides(color="none") + 
+freq.method.re <- ggplot(method.table.re, aes(x=method, y=web.frequency.mean, fill=method)) +
+  geom_bar(stat="identity", color="black", 
+           position=position_dodge()) +
+  geom_errorbar(aes(ymin=web.frequency.mean-se, ymax=web.frequency.mean+se), width=.2) +
+  labs (y="Word-frequency",
+        x="Ranking method") +
+  guides(color="none", fill="none") + 
+  geom_signif(comparisons = list(c("dueling.bandits", "survey")), 
+              annotation=c("***")) +
   theme_apa()
 
 freq.method.re
@@ -544,7 +601,7 @@ cat(svg.string.plot, file = "../../emotions_dashboard/data/web_freq_method_mturk
 dev.off()
 
 
-ggsave('accuracy-charts/web_freq_method_mturk_re.png', width = 8, height = 4)
+ggsave('accuracy-charts/web_freq_method_mturk_re.png', width = 4, height = 4)
 
 
 qqmath(m1, id=0.05) #id: identifies values that may be exerting undue influence on the model (i.e. outliers)

@@ -41,7 +41,6 @@ df %>% get_summary_stats(web.frequency, type = "median")
 
 df %>% get_summary_stats(web.frequency, type = "mean")
 
-
 df %>% group_by(method) %>%  get_summary_stats(web.frequency, type = "median_iqr")
 
 ####################
@@ -49,28 +48,32 @@ df %>% group_by(method) %>%  get_summary_stats(web.frequency, type = "median_iqr
 
 ## check outliers 
 outliers <- df %>% identify_outliers(web.frequency)
-outliers # funny, well
+outliers # content, funny, serious, well
+
+length(df$word)
 
 # filter out outliers
-df2 <- subset(df, photoID != 4 & photoID != 13 & photoID != 14  & photoID != 15 & photoID != 16) 
+df2 <- subset(df, word != 'content' & word != 'funny' & word != 'serious' & word != 'well')
 
-## Check normality assumption
-df2 %>% shapiro_test(web.frequency)
-# not normal 
+length(df2$word)
 
-ggqqplot(df2, x = "web.frequency")
-# not normal
 
 ################
 # basic exploration
 
 df2 %>% get_summary_stats(web.frequency, type = "median") # 3948680
 
-df2 %>% get_summary_stats(web.frequency, type = "mean") # 4691069
+df2 %>% get_summary_stats(web.frequency, type = "mean") # 5368992
 
 df2 %>%
   group_by(method) %>%
   get_summary_stats(web.frequency, type = "mean_se")
+
+# 
+# method          variable          n     mean      se
+# <chr>           <chr>         <dbl>    <dbl>   <dbl>
+# 1 dueling.bandits web.frequency    44 4224193. 663818.
+# 2 survey          web.frequency    45 6488350. 597757.
 
 
 # grouped boxplot
@@ -99,11 +102,11 @@ ggsave('accuracy-charts/web_freq_method_boxplot_uw_students.png', width = 8, hei
 
 ####################
 # T test 
-
-stat.test <- df2  %>% 
-  t_test(web.frequency ~ method, paired = TRUE) %>%
-  add_significance()
-stat.test
+# 
+# stat.test <- df2  %>% 
+#   t_test(web.frequency ~ method, paired = TRUE) %>%
+#   add_significance()
+# stat.test
 
 ########################
 ########################
@@ -125,6 +128,17 @@ m1<-lmer(
   data = df2)
 
 summary(m1)
+
+# Fixed effects:
+#   Estimate Std. Error        df t value Pr(>|t|)    
+# (Intercept)  4.307e+06  6.894e+05 4.816e+01   6.248 1.03e-07 ***
+#   method.dummy 2.300e+06  8.103e+05 5.997e+05   2.839  0.00453 ** 
+#   ---
+#   Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# 
+# Correlation of Fixed Effects:
+#   (Intr)
+# method.dmmy -0.595
 
 tab_model(m1)
 
@@ -149,17 +163,21 @@ cat(aov.apa, file = "../../emotions_dashboard/data/anova_lmer_method_ranking_fre
 
 
 m2<-lmer(
-  web.frequency ~ 1 + method.center + (1 |photoID), 
+  web.frequency ~ 1 + method.dummy + (1 |photoID), 
   data = df2)
 
 summary(m2)
 
-Anova(m1, type = "III")
+car::Anova(m1, type=3)
 
-# Fixed effects:
-#   Estimate Std. Error t value
-# (Intercept)    4691069     460704  10.182
-# method.center  2697361     845246   3.191
+# Analysis of Deviance Table (Type III Wald chisquare tests)
+# 
+# Response: web.frequency
+# Chisq Df Pr(>Chisq)    
+# (Intercept)  39.041  1  4.149e-10 ***
+# method.dummy  8.058  1    0.00453 ** 
+# ---
+# Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 
 ### get mathematical formula
@@ -325,7 +343,7 @@ head(high_cooksd, n=10)
 
 #### high influence data points
 
-high_cooksd$id # 33 65 37 36 64 66
+high_cooksd$id # 35 55 47 78 43 42 77
 
 
 ##############
@@ -353,7 +371,7 @@ dev.off()
 high_cooksd_participants = infl.classes[infl.classes$cooksd > CutOffGroup, ] %>%
   arrange(desc(cooksd))
 
-high_cooksd_participants # none
+high_cooksd_participants # 13
 
 
 #####################################
@@ -466,7 +484,30 @@ m3<-lmer(
   data = df.filtered)
 
 summary(m3)
-Anova(m3, type = "III")
+
+# Fixed effects:
+#   Estimate Std. Error        df t value Pr(>|t|)    
+# (Intercept)  3.231e+06  5.025e+05 4.265e+01   6.429 9.00e-08 ***
+#   method.dummy 2.678e+06  5.719e+05 5.644e+04   4.682 2.85e-06 ***
+#   ---
+#   Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+# 
+# Correlation of Fixed Effects:
+#   (Intr)
+# method.dmmy -0.588
+
+
+car::Anova(m1, type=3)
+# 
+# Analysis of Deviance Table (Type III Wald chisquare tests)
+# 
+# Response: web.frequency
+# Chisq Df Pr(>Chisq)    
+# (Intercept)  39.041  1  4.149e-10 ***
+#   method.dummy  8.058  1    0.00453 ** 
+#   ---
+#   Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
 tab_model(m3)
 
 
