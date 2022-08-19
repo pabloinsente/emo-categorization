@@ -153,6 +153,10 @@ aggregate(x = df$sentimentScore,                # Specify data column
 #####################################
 #####################################
 
+
+head(df)
+df$ethnicityC
+
 ord_m1 <- clmm2(
   emotionF ~ 1 + sexC*ethnicityC + (1 + sexC*ethnicityC|participantId), 
   data=df, 

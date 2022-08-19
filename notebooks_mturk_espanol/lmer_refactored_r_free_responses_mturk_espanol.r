@@ -35,53 +35,53 @@ df_mturk_esp = read_csv("../clean_data_mturk_espanol/free_labeling_emotion_mturk
 ########################
 ########################
 
-
-head(df_mturk_esp)
-
-df_mturk_esp %>%  ggplot(aes(x=sentimentScore)) +
-    geom_histogram(fill="#1f77b4") +
-    theme_ipsum()
-
-by.sex <- df_mturk_esp %>%
-  ggplot( aes(x=sentimentScore, fill=sex)) +
-    geom_histogram( color="#e9ecef", alpha=0.6, position = 'identity') +
-    scale_fill_manual(values=c("#1f77b4", "#ff7f0e")) +
-    theme_ipsum() +
-    stat_bin(bins=20) +
-    labs(fill="")
-by.sex
-
-by.age <- df_mturk_esp %>%
-  ggplot( aes(x=sentimentScore, fill=age)) +
-    geom_histogram( color="#e9ecef", alpha=0.6, position = 'identity') +
-    scale_fill_manual(values=c("#69b3a2", "#404080")) +
-    theme_ipsum() +
-    stat_bin(bins=20) +
-    labs(fill="")
-by.age
-
-by.ethnicity <- df_mturk_esp %>%
-  ggplot( aes(x=sentimentScore, fill=ethnicity)) +
-    geom_histogram( color="#5e6162", alpha=0.6, position = 'identity') +
-    scale_fill_manual(values=c("#69b3a2", "#404080")) +
-    theme_ipsum() +
-    stat_bin(bins=20) +
-    labs(fill="")
-by.ethnicity
-
-df_mturk_esp %>%
-  group_by(participantId) %>%
-  summarise_at(vars(sentimentScore), list(name = mean)) %>% 
-  ggplot(aes(x=name)) +
-    geom_histogram(color="#5e6162", fill="#66a3a3") +
-    theme_ipsum()
-
-df_mturk_esp %>%
-  group_by(photoId) %>%
-  summarise_at(vars(sentimentScore), list(name = mean)) %>% 
-  ggplot(aes(x=name)) +
-    geom_histogram(color="#5e6162", fill="#66a3a3") +
-    theme_ipsum()
+# 
+# head(df_mturk_esp)
+# 
+# df_mturk_esp %>%  ggplot(aes(x=sentimentScore)) +
+#     geom_histogram(fill="#1f77b4") +
+#     theme_ipsum()
+# 
+# by.sex <- df_mturk_esp %>%
+#   ggplot( aes(x=sentimentScore, fill=sex)) +
+#     geom_histogram( color="#e9ecef", alpha=0.6, position = 'identity') +
+#     scale_fill_manual(values=c("#1f77b4", "#ff7f0e")) +
+#     theme_ipsum() +
+#     stat_bin(bins=20) +
+#     labs(fill="")
+# by.sex
+# 
+# by.age <- df_mturk_esp %>%
+#   ggplot( aes(x=sentimentScore, fill=age)) +
+#     geom_histogram( color="#e9ecef", alpha=0.6, position = 'identity') +
+#     scale_fill_manual(values=c("#69b3a2", "#404080")) +
+#     theme_ipsum() +
+#     stat_bin(bins=20) +
+#     labs(fill="")
+# by.age
+# 
+# by.ethnicity <- df_mturk_esp %>%
+#   ggplot( aes(x=sentimentScore, fill=ethnicity)) +
+#     geom_histogram( color="#5e6162", alpha=0.6, position = 'identity') +
+#     scale_fill_manual(values=c("#69b3a2", "#404080")) +
+#     theme_ipsum() +
+#     stat_bin(bins=20) +
+#     labs(fill="")
+# by.ethnicity
+# 
+# df_mturk_esp %>%
+#   group_by(participantId) %>%
+#   summarise_at(vars(sentimentScore), list(name = mean)) %>% 
+#   ggplot(aes(x=name)) +
+#     geom_histogram(color="#5e6162", fill="#66a3a3") +
+#     theme_ipsum()
+# 
+# df_mturk_esp %>%
+#   group_by(photoId) %>%
+#   summarise_at(vars(sentimentScore), list(name = mean)) %>% 
+#   ggplot(aes(x=name)) +
+#     geom_histogram(color="#5e6162", fill="#66a3a3") +
+#     theme_ipsum()
 
 
 

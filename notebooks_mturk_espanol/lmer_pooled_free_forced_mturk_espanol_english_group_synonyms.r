@@ -10,6 +10,8 @@ df.free = read_csv("../clean_data_mturk_espanol/free_labeling_emotion_mturk_long
 df.forced = read_csv("../clean_data_mturk_espanol/forced_choice_emotion_mturk_long_format_lmer_espanol.csv")
 
 syns = fromJSON(file = "../clean_data/syn_dict_emotions.json")
+hyps = fromJSON(file = "../clean_data/hyp_dict_emotions.json")
+
 
 
 df.forced$label <- plyr::mapvalues(df.forced$label, 
@@ -66,7 +68,7 @@ library(plyr)
 
 sum(df.free$emotion == 'anger') # 669
 sum(df.free$emotion == 'disgust') # 372
-sum(df.free$emotion == 'fear') # 32
+sum(df.free$emotion == 'fear') # 379 (used to be 32)
 sum(df.free$emotion == 'happiness') # 627
 sum(df.free$emotion == 'neutral') # 146
 sum(df.free$emotion == 'sadness') # 657
@@ -159,8 +161,69 @@ sum(df.free$emotion == 'sadness') # 826
 sum(df.free$emotion == 'surprise') # 988
 
 
-dim(table(df.free$emotion)) # 290
+
+###################
+## replace hyponyms
+
+# anger
+n = length(hyps$anger)
+from_words = hyps$anger
+to_word = replicate(n, 'anger')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# neutral 
+n = length(hyps$neutral)
+from_words = hyps$neutral
+to_word = replicate(n, 'neutral')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# disgust
+n = length(hyps$disgust)
+from_words = hyps$disgust
+to_word = replicate(n, 'disgust')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# fear
+n = length(hyps$fear)
+from_words = hyps$fear
+to_word = replicate(n, 'fear')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# happiness
+n = length(hyps$happiness)
+from_words = hyps$happiness
+to_word = replicate(n, 'happiness')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# sadness
+n = length(hyps$sadness)
+from_words = hyps$sadness
+to_word = replicate(n, 'sadness')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+# surprise
+n = length(hyps$surprise)
+from_words = hyps$surprise
+to_word = replicate(n, 'surprise')
+df.free$emotion  <- mapvalues(df.free$emotion, from=from_words, to=to_word)
+
+
+## after replacing with hyponyms too
+sum(df.free$emotion == 'anger') # 717 -> 774
+sum(df.free$emotion == 'disgust') # 382 -> 428
+sum(df.free$emotion == 'fear') # 451 -> 497 
+sum(df.free$emotion == 'happiness') # 1031 -> 1031
+sum(df.free$emotion == 'neutral') # 148 -> 148
+sum(df.free$emotion == 'sadness') # 826 -> 844
+sum(df.free$emotion == 'surprise') # 988 -> 988
+
+
+################
+# scared is not among synsets or hyponyms 
+df.free$emotion <- mapvalues(df.free$emotion, from="scared", to="fear")
+
+sum(df.free$emotion == 'fear') # 497 ->
+
+
+dim(table(df.free$emotion)) # 457 -> 279
 table(df.free$label)
+
+# anger   disgust   fear   happiness   neutral   sadness  surprise 
+# 1125      1273    1364      1140      822      1189      1216
 
 head(df.free)
 
@@ -174,7 +237,7 @@ df.free$condition.center <- -.5
 
 head(df.free)
 
-n_distinct(df.free$emotion) # 290 distinct emotion words
+n_distinct(df.free$emotion) # 290 -> 279 distinct emotion words
 
 
 ##################
@@ -236,25 +299,31 @@ library(crosstable)
 library(apaTables)
 
 
-mean(df$correct) # 0.4889444
-mean(df.english$correct) # 0.3929795
+mean(df$correct) # 0.497
 
 
-crosstable(df.pool, c(condition, language.condition), by=correct,  total="both") %>%
-  as_flextable() 
+df %>%  group_by(condition) %>%  get_summary_stats(correct, type = "mean_se")
 
-apa.2way.table(iv1=condition,
-               iv2=language.condition,
-               dv=correct,
-               data=df.pool,
-               landscape=TRUE, 
-               filename="two_way_table.doc")
+# condition variable     n  mean    se
+# <chr>     <chr>    <dbl> <dbl> <dbl>
+# 1 forced    correct   5077 0.697 0.006
+# 2 free      correct   8129 0.374 0.005
+
+mean(df.english$correct) #0.402
+
+df.english %>%  group_by(condition) %>%  get_summary_stats(correct, type = "mean_se")
+
+# condition variable     n  mean    se
+# <chr>     <chr>    <dbl> <dbl> <dbl>
+# 1 forced    correct   8350 0.594 0.005
+# 2 free      correct  12674 0.275 0.004
 
 ####################
 # LMER
 ####################
 
 library(lme4)
+library(sjPlot)
 
 # Full model:
 # - repeated measures for participantId
@@ -267,11 +336,18 @@ library(lme4)
 # df.pool$condition.dummy <- to_factor(df.pool$condition.dummy)
 # df.pool$language.condition.dummy <- to_factor(df.pool$language.condition.dummy)
 
+# Condition: forced = 1
+# Language: espanol =  1
+# b1: forced at english
+# b2: espanol at free-response
+
 m1 <- glmer(correct ~ 1 + condition.dummy*language.condition.dummy + (1 | participantIdF) +  (1 | photoIdF),
             data = df.pool,
             family = binomial) 
 
 summary(m1)
+car::Anova(m1, type="3")
+tab_model(m1)
 
 ##########
 ## free vs forced condition
@@ -306,12 +382,20 @@ plogis(fix.effect) # 0.54
 # df.pool$condition.center <- to_factor(df.pool$condition.center)
 # df.pool$language.condition.center <- to_factor(df.pool$language.condition.center)
 
+length(table(df.pool$participantId))
 
-m2 <- glmer(correct ~ 1 + condition.center*language.condition.center + (1 | participantIdF)  + (1 | photoIdF),
+
+length(table(df.pool$participantIdF))
+
+
+
+m2 <- glmer(correct ~ 1 + condition.center*language.condition.center + (1 | participantId)  + (1 | photoIdF),
             data = df.pool,
             family = binomial) 
 
 summary(m2)
+car::Anova(m2, type="3")
+tab_model(m2)
 
 ##########
 ## free vs forced condition
@@ -549,12 +633,12 @@ correct.survey.lang
 names(correct.survey.lang)[5] <- "correct"
 
 correct.survey.lang.plot <- ggplot(correct.survey.lang, aes(x = reorder(language.condition, -correct), y=correct, fill=condition)) + 
-  geom_bar(position=position_dodge(), stat="identity") +
+  geom_bar(position=position_dodge(), stat="identity", color="black") +
   # geom_errorbar(aes(ymin=correct-se, ymax=correct+se),
   #               width=.2,                    # Width of the error bars
   #               position=position_dodge(.9))+
-  labs(x = "expected emotion label",
-       title = "Correct responses grouped by Wordnet synonyms") + 
+  labs(x = "language-origin",
+       fill="response-format") + 
   theme_apa()
 
 correct.survey.lang.plot
@@ -572,6 +656,6 @@ cat(svg.string.plot, file = "../../emotions_dashboard/data/correct_label_survey_
 
 dev.off()
 
-ggsave('accuracy-charts/correct-lang-survey.png', width = 8, height = 4)
+ggsave('accuracy-charts/correct-lang-survey.png', width = 6, height = 4)
 
 
